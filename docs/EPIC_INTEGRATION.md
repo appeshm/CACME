@@ -11,7 +11,7 @@ The app is already structured as a standard **SMART on FHIR (R4) EHR-launch** ap
 ### Steps
 1. Register a developer account at https://fhir.epic.com and create an app with **EHR launch**, FHIR R4, and the scopes in `app/smart-config.js`.
 2. Put the client ID in `app/smart-config.js`.
-3. Host `app/` and `src/` over HTTPS (any static host works; there is no server-side code).
+3. Hosting is done: launch URL `https://11well.com/ldl-goal-navigator/launch.html`, redirect URL `https://11well.com/ldl-goal-navigator/index.html` (HTTPS via GitHub Pages; no server-side code).
 4. Test in the Epic sandbox with sandbox patients. Then work with your organization's Epic analysts to:
    - add any **local lab codes** (many sites use proprietary component IDs in addition to LOINC) to `LOINC` in `mapping.js`;
    - decide where the **CAC score** lives (often only in the radiology report text). No standard LOINC exists, so the clinician enters it manually for now;

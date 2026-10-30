@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>11well</title>
+<meta name="description" content="11well builds evidence-based clinical tools for cardiovascular prevention. Start with LDL Goal Navigator.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one centered column; hero pairs the thesis with an LDL-C "goal ladder" drawn from the guideline. */
+:root {
+  --bg: #f5f7f8; --surface: #ffffff; --ink: #15232b; --muted: #5a6a73; --line: #d8e0e4;
+  --accent: #0b6e72; --accent-soft: #e2f1f1;
+  --g100: #2f7d4f; --g70: #c17a12; --g55: #b3352b;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
+    --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
+  --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.55; }
+a { color: var(--accent); }
+a:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+header.nav { padding-block: 18px; border-bottom: 1px solid var(--line); }
+header.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { font-family: var(--font-head); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.brand b { color: var(--accent); font-weight: 700; }
+header.nav nav a { font-size: 0.92rem; text-decoration: none; color: var(--muted); }
+header.nav nav a:hover { color: var(--ink); }
+
+.hero { padding-block: 64px 56px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+@media (max-width: 820px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; } .hero { padding-block: 40px; } }
+.eyebrow { font-family: var(--font-num); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+h1 { font-family: var(--font-head); font-weight: 700; font-size: clamp(2.2rem, 5.2vw, 3.6rem); line-height: 1.04; letter-spacing: -0.02em; margin: 0 0 18px; text-wrap: balance; }
+.lede { font-size: 1.12rem; color: var(--muted); max-width: 52ch; margin: 0 0 28px; }
+.ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-block; font-weight: 600; font-size: 0.98rem; padding: 12px 20px; border-radius: 6px; text-decoration: none; border: 1px solid var(--accent); }
+.btn.primary { background: var(--accent); color: var(--surface); }
+.btn.ghost { color: var(--accent); background: transparent; }
+
+/* Goal ladder */
+.ladder { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px 22px 18px; }
+.ladder h2 { font-family: var(--font-head); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; font-weight: 600; }
+.rung { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 14px; align-items: baseline; padding-block: 12px; border-top: 1px solid var(--line); }
+.rung:first-of-type { border-top: 0; }
+.rung .goal { font-family: var(--font-num); font-size: 1.35rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rung .goal small { font-size: 0.72rem; color: var(--muted); }
+.rung p { margin: 0; font-size: 0.9rem; color: var(--muted); min-width: 0; }
+.rung.r100 .goal { color: var(--g100); } .rung.r70 .goal { color: var(--g70); } .rung.r55 .goal { color: var(--g55); }
+.ladder .src { margin: 10px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line); }
+section.block h2.sec { font-family: var(--font-head); font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.01em; margin: 0 0 8px; text-wrap: balance; }
+section.block p.sub { color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
+
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 28px; }
+@media (max-width: 820px) { .tool { grid-template-columns: minmax(0, 1fr); padding: 22px; } }
+.tool h3 { font-family: var(--font-head); font-size: 1.5rem; margin: 0 0 8px; }
+.tool p { margin: 0 0 18px; color: var(--muted); }
+ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 14px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 10px; align-items: start; }
+ol.steps li::before { content: counter(s); font-family: var(--font-num); font-size: 0.85rem; color: var(--accent); background: var(--accent-soft); border-radius: 50%; width: 1.7rem; height: 1.7rem; display: grid; place-items: center; }
+ol.steps b { display: block; font-size: 0.98rem; }
+ol.steps span { font-size: 0.88rem; color: var(--muted); }
+
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 820px) { .facts { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
+.facts h3 { font-size: 1.02rem; margin: 0 0 6px; }
+.facts p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+.notice { background: var(--accent-soft); border-radius: 8px; padding: 18px 20px; font-size: 0.9rem; max-width: 75ch; }
+footer { padding-block: 36px 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/">11<b>well</b></a>
+    <nav><a href="/ldl-goal-navigator/">LDL Goal Navigator</a></nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Cardiovascular prevention tools</p>
+        <h1>The right LDL goal, and the medicines to reach it.</h1>
+        <p class="lede">11well builds clinical decision support for primary care and cardiology teams, grounded in the current guidelines and the trials behind them. Every recommendation shows its source.</p>
+        <div class="ctas">
+          <a class="btn primary" href="/ldl-goal-navigator/">Open LDL Goal Navigator</a>
+          <a class="btn ghost" href="#how">How it works</a>
+        </div>
+      </div>
+      <div class="ladder" aria-label="LDL-C goals in the 2026 ACC/AHA dyslipidemia guideline">
+        <h2>LDL-C goals, 2026 guideline</h2>
+        <div class="rung r100"><span class="goal">&lt;100 <small>mg/dL</small></span><p>Borderline or intermediate 10-year risk, diabetes, CAC 1&ndash;99</p></div>
+        <div class="rung r70"><span class="goal">&lt;70 <small>mg/dL</small></span><p>High risk (&ge;10%), CAC &ge;100, clinical ASCVD</p></div>
+        <div class="rung r55"><span class="goal">&lt;55 <small>mg/dL</small></span><p>Very high-risk ASCVD, ASCVD with CKD, CAC &ge;1000</p></div>
+        <p class="src">Simplified. The tool applies the full rules, including FH and triglycerides.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <h2 class="sec">LDL Goal Navigator</h2>
+      <p class="sub">Answer only the questions that can change the goal or the medicines. Known ASCVD takes a handful of fields; primary prevention adds CAC and the PREVENT score.</p>
+      <div class="tool">
+        <div>
+          <h3>From chart data to a treatment plan</h3>
+          <p>Enter the values or launch it from Epic. You get an LDL-C goal, statin intensity and starting doses, the expected LDL-C after each step, and when to recheck.</p>
+          <a class="btn primary" href="/ldl-goal-navigator/">Open the tool</a>
+        </div>
+        <ol class="steps">
+          <li><div><b>Pathway</b><span>Clinical ASCVD, LDL-C &ge;190 or familial hypercholesterolemia, or primary prevention.</span></div></li>
+          <li><div><b>Coronary artery calcium</b><span>Used for every primary-prevention patient to set the goal.</span></div></li>
+          <li><div><b>10-year risk</b><span>Calculate with the AHA PREVENT equations, or enter the score already in the chart.</span></div></li>
+          <li><div><b>Goal and medicines</b><span>Statin first, then ezetimibe, then a PCSK9 antibody, with a separate path for statin intolerance.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="facts">
+        <div><h3>Built on the evidence</h3><p>2026 ACC/AHA multisociety dyslipidemia guideline, the PREVENT equations (Khan et al., Circulation 2024) and outcome trials such as IMPROVE-IT, FOURIER and CLEAR Outcomes.</p></div>
+        <div><h3>Shows its reasoning</h3><p>Each step lists its source and class of recommendation. Where evidence is unclear, the tool flags it for the clinician instead of guessing.</p></div>
+        <div><h3>Data stays with you</h3><p>Calculations run in your browser. Patient information is not sent to or stored on this site.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="notice"><strong>For clinicians.</strong> LDL Goal Navigator is decision support. It does not replace clinical judgment, is not FDA-cleared, and is under validation. Review every recommendation before acting on it.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 11well</span>
+    <span>Created by a practicing cardiologist.</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -34,7 +34,7 @@ tools/        builds a single-file demo (dist/preview.html)
 ```
 
 ## Live site
-GitHub Pages: https://appeshm.github.io/CACME/ (deployed automatically by `.github/workflows/pages.yml` after tests pass).
+https://11well.com (landing page) and https://11well.com/ldl-goal-navigator/ (the tool), hosted on GitHub Pages and deployed automatically by `.github/workflows/pages.yml` after tests pass. `tools/build-site.sh` assembles the site; the landing page lives in `site/`.
 Manual entry only on the public site; the Epic (SMART on FHIR) launch needs a registered client ID.
 
 ## Run it
