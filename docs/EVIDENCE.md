@@ -4,6 +4,7 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 
 - **verified**: checked against the primary source or an independent implementation.
 - **secondary-source**: confirmed only through official summaries (ACC/AHA news, JACC Guideline-at-a-Glance, Medscape). The full text has not yet been reviewed line by line.
+- **clinician-confirmed**: decided by the project's physician lead where the available guideline text was ambiguous (evidence ID `PHYSICIAN_LEAD`).
 - **needs-review**: plausible but not confirmed. **Never applied automatically.** Shown to the clinician as a "review" note.
 
 ## Risk model
@@ -24,7 +25,11 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 | CAC 0 does not de-risk FH | secondary-source |
 | CAC scoring for men >40, women >45 at borderline/intermediate risk | secondary-source |
 | Measure Lp(a) in all adults | secondary-source |
-| "Moderate-to-severe" CAC → high-intensity statin, LDL-C <70. **Cutoff not confirmed** | needs-review |
+| "Moderate-to-severe" CAC → high-intensity statin, LDL-C <70, defined as **CAC ≥300** | clinician-confirmed |
+| CAC ≥1000 → LDL-C <70, with <55 shown as a consideration | clinician-confirmed |
+| CAC 0 → rescan in 5 years | clinician-confirmed |
+| All clinical ASCVD → LDL-C <55 | clinician-confirmed |
+| LDL-C ≥190 / FH → LDL-C <70 and ≥50% reduction | clinician-confirmed |
 
 ## 2018 AHA/ACC cholesterol guideline (Grundy et al., Circulation 2019)
 | Rule | Status |

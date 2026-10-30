@@ -1,16 +1,18 @@
 # Open clinical questions for the physician lead
 
+Answered items (2026-10-30) are recorded in `src/engine/evidence.js` as `PHYSICIAN_LEAD` with status **clinician-confirmed**.
+
 The app does **not** guess on any of these. Each is either shown as a "review" note or left to the clinician.
 Answer them (with the guideline section or table number) and the config in
 `src/engine/guideline-config.js` can be updated in a few lines.
 
 | # | Question | Current behavior | Where |
 |---|---|---|---|
-| 1 | **CAC ≥100.** The 2026 guideline wording found so far says "moderate-to-severe" CAC → high-intensity statin, LDL-C <70. Does the guideline define this as CAC ≥100 (or ≥75th percentile)? | Flagged for review. Goal stays <100 (confirmed for any CAC >0). | `cac.elevated` |
-| 2 | **CAC ≥300 / ≥1000.** Is there a guideline-endorsed LDL-C goal (e.g., <55 for CAC ≥1000)? Only secondary commentary was found. | Flagged; no goal applied. | `cac.veryHigh` |
-| 3 | **CAC = 0 repeat interval.** 2018 said 5–10 years. Summaries of 2026 say about 5 years. What does the 2026 text say, and does it depend on risk? | Interval left to the clinician. | `cac.zero.repeatYears` |
-| 4 | **Secondary prevention, not very high risk.** Is the 2026 LDL-C goal <70? | Flagged; no goal applied unless very high risk (<55). | `secondaryPrevention.ldlGoalAscvd` |
-| 5 | **LDL-C ≥190 / FH.** What is the 2026 LDL-C goal? (2018: ≥50% reduction; add ezetimibe if ≥100 on statin) | Flagged; high-intensity statin recommended. | `severeHypercholesterolemia.ldlGoal` |
+| 1 | ~~CAC ≥100 cutoff~~ **Answered: use CAC ≥300** for high-intensity statin + LDL-C <70. CAC 1–299 → moderate, <100. | Applied. | `cac.elevated` |
+| 2 | ~~CAC ≥1000~~ **Answered: LDL-C <70, with a note to consider <55.** | Applied. | `cac.veryHigh` |
+| 3 | ~~CAC = 0 repeat interval~~ **Answered (physician lead, 2026-10-30): 5 years.** | Applied. | `cac.zero.repeatYears` |
+| 4 | ~~Secondary prevention goal~~ **Answered: <55 for all clinical ASCVD.** | Applied. | `secondaryPrevention.ldlGoalAscvd` |
+| 5 | ~~LDL-C ≥190 / FH goal~~ **Answered: <70 and ≥50% reduction.** | Applied. | `severeHypercholesterolemia.ldlGoal` |
 | 6 | **Diabetes.** Does 2026 change the diabetes-specific recommendations (age range, intensity, goal) beyond the PREVENT tier? | Uses 2018 (age 40–75 → at least moderate statin) plus PREVENT tier goal. | `diabetes` |
 | 7 | **30-year PREVENT.** The 2026 guideline reportedly uses 30-year risk for some younger adults. Can you provide Suppl. Table S12 (30-year) so the coefficients can be entered and checked? | Not implemented. | `prevent.js` |
 | 8 | **PREVENT full model.** Should UACR, HbA1c and SDI (zip code) be added? Needs Suppl. Tables S12B–D. | Not implemented. | `prevent.js` |

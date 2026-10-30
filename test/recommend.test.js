@@ -37,6 +37,7 @@ test('CAC = 0 in borderline/intermediate risk without exclusions defers statin',
   assert.ok(['borderline', 'intermediate'].includes(r.tier));
   assert.equal(r.statin.intensity, 'defer');
   assert.equal(r.ldlGoal, null);
+  assert.ok(r.cac.text.includes('5 years'));
 });
 
 test('CAC = 0 does not de-risk a smoker', () => {
@@ -51,10 +52,32 @@ test('CAC > 0 sets LDL-C goal <100 and at least moderate statin', () => {
   assert.equal(r.statin.intensity, 'moderate');
 });
 
-test('CAC >=100 thresholds are flagged, not silently applied', () => {
+test('CAC 100-299 stays moderate with goal <100', () => {
   const r = recommend({ ...pp, cac: { score: 250 } });
-  assert.equal(r.ldlGoal.value, 100); // not auto-tightened to 70
-  assert.ok(r.flags.some((f) => f.level === 'review' && f.text.includes('not applied automatically')));
+  assert.equal(r.ldlGoal.value, 100);
+  assert.equal(r.statin.intensity, 'moderate');
+});
+
+test('CAC >=300 gives high-intensity statin and goal <70', () => {
+  const r = recommend({ ...pp, cac: { score: 300 } });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.equal(r.statin.intensity, 'high');
+});
+
+test('CAC >=1000 keeps goal <70 and suggests considering <55', () => {
+  const r = recommend({ ...pp, cac: { score: 1200 } });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.ok(r.flags.some((f) => f.text.includes('<55')));
+});
+
+test('all clinical ASCVD has goal <55', () => {
+  assert.equal(recommend({ ...pp, clinicalAscvd: true }).ldlGoal.value, 55);
+});
+
+test('LDL-C >=190 has goal <70 with >=50% reduction note', () => {
+  const r = recommend({ ...pp, ldl: 200 });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.ok(r.flags.some((f) => f.text.includes('50% reduction')));
 });
 
 test('high-risk patient gets high-intensity statin and goal <70; ezetimibe projected if needed', () => {

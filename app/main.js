@@ -94,7 +94,7 @@ function renderClin(r) {
 
   parts.push(`<details class="card"><summary><h2 style="display:inline">Sources (${r.evidence.length})</h2></summary><div class="evid" style="margin-top:10px">${r.evidence.map((id) => {
     const e = EVIDENCE[id];
-    return `<div><span><b>${esc(id)}</b> <span class="status ${e.status}">${e.status.replace('-', ' ')}</span></span><span>${esc(e.cite)}${e.doi ? ` doi:${esc(e.doi)}` : ''}</span><span class="refs">${esc(e.note)}</span></div>`;
+    return `<div><span><b>${esc(id)}</b> <span class="status ${e.status}">${e.status.replace(/-/g, ' ')}</span></span><span>${esc(e.cite)}${e.doi ? ` doi:${esc(e.doi)}` : ''}</span><span class="refs">${esc(e.note)}</span></div>`;
   }).join('')}</div></details>`);
   $('clin').innerHTML = `<div style="display:grid;gap:16px">${parts.join('')}</div>`;
 }

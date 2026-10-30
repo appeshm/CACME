@@ -102,7 +102,7 @@ ol.plan .safety { color: var(--crit); font-size: 0.82rem; display: block; }
 .evid { display: grid; gap: 8px; font-size: 0.8rem; }
 .evid div { display: grid; gap: 1px; }
 .status { font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
-.status.verified { color: var(--ok); } .status.secondary-source { color: var(--warn); } .status.needs-review { color: var(--crit); }
+.status.verified { color: var(--ok); } .status.secondary-source { color: var(--warn); } .status.needs-review { color: var(--crit); } .status.clinician-confirmed { color: var(--info); }
 .patient p { margin: 0 0 8px; max-width: 62ch; font-size: 1rem; }
 .foot { margin-top: 28px; color: var(--muted); font-size: 0.78rem; max-width: 75ch; }
 @media (prefers-reduced-motion: no-preference) { .scale .marker i { transition: left 0.3s ease; } }

@@ -45,14 +45,15 @@ export const GUIDELINE = Object.freeze({
   },
 
   secondaryPrevention: {
-    // ASCVD, not very-high-risk: goal not confirmed in 2026 text available to us.
-    ldlGoalAscvd: { value: 70, status: 'needs-review', evidence: ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018'] },
+    // All clinical ASCVD → <55 (physician lead decision).
+    ldlGoalAscvd: { value: 55, status: 'clinician-confirmed', evidence: ['DYSLIPIDEMIA_2026', 'PHYSICIAN_LEAD'] },
     ldlGoalVeryHighRisk: { value: 55, status: 'secondary-source', evidence: ['DYSLIPIDEMIA_2026'] },
   },
 
   severeHypercholesterolemia: {
     ldlThreshold: 190, // CHOLESTEROL_2018 (verified)
-    ldlGoal: { value: 100, status: 'needs-review', evidence: ['CHOLESTEROL_2018'] },
+    // <70 and ≥50% reduction (physician lead decision; treated as high risk).
+    ldlGoal: { value: 70, minReduction: 0.5, status: 'clinician-confirmed', evidence: ['CHOLESTEROL_2018', 'PHYSICIAN_LEAD'] },
   },
 
   diabetes: {
@@ -65,16 +66,16 @@ export const GUIDELINE = Object.freeze({
     eligibleAge: { male: 40, female: 45 },
     zero: {
       // 2018: withhold statin & reassess in 5–10 y unless diabetes, smoking, family hx premature ASCVD.
-      // 2026 summaries mention ~5 years; interval left to clinician until verified.
-      repeatYears: null,
+      // 5 years: consistent with 2026 guideline summaries; confirmed by physician lead (2026-10-30).
+      repeatYears: 5,
       exclusions: ['diabetes', 'smoker', 'familyHistoryPrematureAscvd', 'fh'],
-      evidence: ['CHOLESTEROL_2018', 'DYSLIPIDEMIA_2026'],
+      evidence: ['CHOLESTEROL_2018', 'DYSLIPIDEMIA_2026', 'PHYSICIAN_LEAD'],
     },
-    mild: { min: 1, max: 99, statin: 'moderate', ldlGoal: 100, status: 'secondary-source', evidence: ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018'] },
-    // "Moderate-to-severe" CAC → high-intensity, LDL <70. Mapping that phrase to a ≥100 cutoff is NOT confirmed.
-    elevated: { min: 100, statin: 'high', ldlGoal: 70, status: 'needs-review', evidence: ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018'] },
-    // CAC ≥1000: LDL <55 appears only in secondary commentary. Not applied.
-    veryHigh: { min: 1000, ldlGoal: null, status: 'needs-review', evidence: ['DYSLIPIDEMIA_2026'] },
+    mild: { min: 1, max: 299, statin: 'moderate', ldlGoal: 100, status: 'secondary-source', evidence: ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018'] },
+    // "Moderate-to-severe" CAC → high-intensity, LDL <70. Cutoff ≥300 set by physician lead.
+    elevated: { min: 300, statin: 'high', ldlGoal: 70, status: 'clinician-confirmed', evidence: ['DYSLIPIDEMIA_2026', 'PHYSICIAN_LEAD'] },
+    // CAC ≥1000: keep <70 (from ≥300 rule); show that <55 may be considered (physician lead).
+    veryHigh: { min: 1000, ldlGoal: null, considerGoal: 55, status: 'clinician-confirmed', evidence: ['DYSLIPIDEMIA_2026', 'PHYSICIAN_LEAD'] },
   },
 
   // Apply "needs-review" thresholds automatically? Default false = conservative.

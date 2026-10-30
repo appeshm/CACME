@@ -73,7 +73,10 @@ export function recommend(pt) {
     out.pathway = 'severe';
     raise('high', 'LDL-C ≥190 mg/dL or familial hypercholesterolemia: high-intensity statin without needing risk calculation.', ['CHOLESTEROL_2018']);
     const rule = GUIDELINE.severeHypercholesterolemia.ldlGoal;
-    if (usable(rule)) goal(rule.value, 'Severe hypercholesterolemia', rule.evidence, rule.status);
+    if (usable(rule)) {
+      goal(rule.value, 'LDL-C ≥190 / FH', rule.evidence, rule.status);
+      flag('info', `Goal: LDL-C <${rule.value} mg/dL AND ≥${Math.round(rule.minReduction * 100)}% reduction from untreated baseline.`, rule.evidence);
+    }
     else flag('review', 'For LDL-C ≥190 / FH, the 2018 guideline supports adding ezetimibe if LDL-C stays ≥100 mg/dL on maximal statin. The 2026 goal for this group is not yet verified; clinician to confirm.', rule.evidence);
     flag('info', 'Consider evaluation for familial hypercholesterolemia and cascade screening of relatives.', ['CHOLESTEROL_2018']);
   } else {
@@ -185,16 +188,17 @@ function interpretCac(pt, out, { raise, goal, flag }) {
   if (res.score >= cfg.elevated.min) {
     res.category = 'elevated';
     const e = cfg.elevated;
-    if (GUIDELINE.applyUnverifiedThresholds) {
+    if (e.status !== 'needs-review' || GUIDELINE.applyUnverifiedThresholds) {
       raise(e.statin, `CAC ≥${e.min}: high-intensity statin.`, e.evidence);
       goal(e.ldlGoal, `CAC ≥${e.min}`, e.evidence, e.status);
+      res.text = `CAC ${res.score}: high-intensity statin with LDL-C goal <${e.ldlGoal} mg/dL.`;
     } else {
       flag('review', `CAC = ${res.score}. The 2026 guideline supports high-intensity statin with LDL-C <${e.ldlGoal} mg/dL for "moderate-to-severe" coronary calcium. Whether this maps to CAC ≥${e.min} has not been verified, so it is not applied automatically. Clinician to decide.`, e.evidence);
     }
   }
   if (res.score >= cfg.veryHigh.min) {
     res.category = 'very-high';
-    flag('review', `CAC ≥${cfg.veryHigh.min}: event rates in observational cohorts approach those of secondary prevention. A lower LDL-C goal may be appropriate; no goal is applied automatically.`, cfg.veryHigh.evidence);
+    flag('review', `CAC ≥${cfg.veryHigh.min}: event rates in observational cohorts approach those of secondary prevention. Consider a lower LDL-C goal of <${cfg.veryHigh.considerGoal} mg/dL (clinician decision; not applied automatically).`, cfg.veryHigh.evidence);
   }
   return res;
 }

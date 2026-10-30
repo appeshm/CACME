@@ -68,6 +68,12 @@ export const EVIDENCE = Object.freeze({
     status: 'verified',
     note: 'Background for CAC-based risk refinement. MESA risk score itself is NOT implemented here.',
   },
+  PHYSICIAN_LEAD: {
+    cite: 'Project physician lead (preventive cardiologist) decision, 2026-10-30, where the 2026 guideline text available to the build was ambiguous.',
+    doi: null,
+    status: 'clinician-confirmed',
+    note: 'CAC 0 rescan 5 y; CAC \u2265300 \u2192 high-intensity statin, LDL-C <70; CAC \u22651000 \u2192 <70 with <55 considered; all clinical ASCVD \u2192 LDL-C <55; LDL-C \u2265190/FH \u2192 LDL-C <70 and \u226550% reduction.',
+  },
   FDA_LABELS: {
     cite: 'US FDA prescribing information (rosuvastatin, atorvastatin, simvastatin, ezetimibe, bempedoic acid, evolocumab, alirocumab, inclisiran).',
     doi: null,
