@@ -13,10 +13,10 @@ Answer them (with the guideline section or table number) and the config in
 | 3 | ~~CAC = 0 repeat interval~~ **Answered (physician lead, 2026-10-30): 5 years.** | Applied. | `cac.zero.repeatYears` |
 | 4 | ~~Secondary prevention goal~~ **Answered: <55 for all clinical ASCVD.** | Applied. | `secondaryPrevention.ldlGoalAscvd` |
 | 5 | ~~LDL-C ≥190 / FH goal~~ **Answered: <70 and ≥50% reduction.** | Applied. | `severeHypercholesterolemia.ldlGoal` |
-| 6 | **Diabetes.** Does 2026 change the diabetes-specific recommendations (age range, intensity, goal) beyond the PREVENT tier? | Uses 2018 (age 40–75 → at least moderate statin) plus PREVENT tier goal. | `diabetes` |
-| 7 | **30-year PREVENT.** The 2026 guideline reportedly uses 30-year risk for some younger adults. Can you provide Suppl. Table S12 (30-year) so the coefficients can be entered and checked? | Not implemented. | `prevent.js` |
-| 8 | **PREVENT full model.** Should UACR, HbA1c and SDI (zip code) be added? Needs Suppl. Tables S12B–D. | Not implemented. | `prevent.js` |
-| 9 | **Very-high-risk definition.** Should the app compute very-high-risk status (major ASCVD events + high-risk conditions), or keep it as a clinician checkbox? | Checkbox. | UI |
+| 6 | ~~Diabetes~~ **Answered: keep at least moderate-intensity statin at age 40–75**; goal from PREVENT tier / CAC. | Applied. | `diabetes` |
+| 7 | **30-year PREVENT.** Physician lead will upload the Khan et al. supplement; coefficients to be entered and cross-checked. | Pending upload. | `prevent.js` |
+| 8 | **PREVENT full model (UACR, HbA1c, SDI).** Pending the same supplement upload. | Pending upload. | `prevent.js` |
+| 9 | ~~Very-high-risk definition~~ **Answered: not needed** since all ASCVD uses LDL-C <55. Checkbox removed from the form. | Applied. | UI |
 | 10 | ~~Patients already on a statin~~ **Answered: ask for pre-statin lipids.** Optional pre-statin TC/HDL-C give a statin-naive estimate; otherwise the on-treatment estimate is shown with a review note. Pre-statin LDL-C is used to check the ≥50% reduction target. | Applied. | `recommend.js` |
 | 11 | ~~PCSK9 in primary prevention~~ **Answered: suggest it** after statin + ezetimibe when the goal is <70 (high risk or CAC ≥300), citing VESALIUS-CV with a note on the trial population. | Applied. | `buildPlan` |
 | 12 | ~~Ezetimibe effect size~~ **Answered: keep 24%.** | Applied. | `therapies.js` |
