@@ -17,6 +17,6 @@ Answer them (with the guideline section or table number) and the config in
 | 7 | **30-year PREVENT.** The 2026 guideline reportedly uses 30-year risk for some younger adults. Can you provide Suppl. Table S12 (30-year) so the coefficients can be entered and checked? | Not implemented. | `prevent.js` |
 | 8 | **PREVENT full model.** Should UACR, HbA1c and SDI (zip code) be added? Needs Suppl. Tables S12B–D. | Not implemented. | `prevent.js` |
 | 9 | **Very-high-risk definition.** Should the app compute very-high-risk status (major ASCVD events + high-risk conditions), or keep it as a clinician checkbox? | Checkbox. | UI |
-| 10 | **Patients already on a statin.** PREVENT includes statin use as a predictor. For tier assignment in treated patients, should the app use the treated estimate, or request a pre-treatment LDL/TC? | Uses treated estimate and shows a caution. | `recommend.js` |
-| 11 | **PCSK9 in primary prevention.** VESALIUS-CV (evolocumab, patients without prior MI or stroke) has been reported. Should PCSK9 mAb be a suggested step in high-risk primary prevention? | Only suggested in secondary prevention, severe hypercholesterolemia, or statin intolerance. Otherwise flagged. | `buildPlan` |
-| 12 | **Ezetimibe effect size.** The app projects ~24% added reduction (IMPROVE-IT). Prefer a different, more conservative figure? | 24%. | `therapies.js` |
+| 10 | ~~Patients already on a statin~~ **Answered: ask for pre-statin lipids.** Optional pre-statin TC/HDL-C give a statin-naive estimate; otherwise the on-treatment estimate is shown with a review note. Pre-statin LDL-C is used to check the ≥50% reduction target. | Applied. | `recommend.js` |
+| 11 | ~~PCSK9 in primary prevention~~ **Answered: suggest it** after statin + ezetimibe when the goal is <70 (high risk or CAC ≥300), citing VESALIUS-CV with a note on the trial population. | Applied. | `buildPlan` |
+| 12 | ~~Ezetimibe effect size~~ **Answered: keep 24%.** | Applied. | `therapies.js` |

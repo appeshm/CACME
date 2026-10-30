@@ -3,7 +3,7 @@ import { GUIDELINE } from '../src/engine/guideline-config.js';
 import { EVIDENCE } from '../src/engine/evidence.js';
 
 const $ = (id) => document.getElementById(id);
-const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'sbp', 'bmi', 'egfr'];
+const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
 const BOOL = ['diabetes', 'smoker', 'onBpMeds', 'clinicalAscvd', 'veryHighRisk', 'fh', 'statinIntolerance', 'lpaMeasured'];
 const THER = ['ezetimibe', 'pcsk9', 'inclisiran', 'bempedoic'];
 

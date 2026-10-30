@@ -58,7 +58,11 @@ export function recommend(pt) {
 
   const ther = pt.currentTherapy || {};
   const onStatin = Boolean(ther.statinDrug);
-  const preventInput = { ...pt, onStatin };
+  // Physician-lead decision: if pre-statin lipids are entered, estimate risk as statin-naive.
+  const usePreStatin = onStatin && Number.isFinite(pt.untreatedTotalCholesterol) && Number.isFinite(pt.untreatedHdl);
+  const preventInput = usePreStatin
+    ? { ...pt, totalCholesterol: pt.untreatedTotalCholesterol, hdl: pt.untreatedHdl, onStatin: false }
+    : { ...pt, onStatin };
 
   // ---- 1. Pathway -------------------------------------------------------
   if (pt.clinicalAscvd) {
@@ -97,8 +101,10 @@ export function recommend(pt) {
       const plan = GUIDELINE.tierPlan[tier.id];
       raise(plan.statin, `${tier.label} 10-year PREVENT-ASCVD risk: ${plan.text}`, plan.evidence);
       if (plan.ldlGoal != null) goal(plan.ldlGoal, `${tier.label} risk tier`, plan.evidence);
-      if (onStatin) {
-        flag('info', 'Patient is on a statin; PREVENT includes statin use as a predictor, but tier thresholds were defined for treatment-naive decision-making. Interpret with care.', ['PREVENT_2024']);
+      if (usePreStatin) {
+        flag('info', 'Risk calculated from the pre-statin total cholesterol and HDL-C entered (statin-naive estimate).', ['PREVENT_2024', 'PHYSICIAN_LEAD']);
+      } else if (onStatin) {
+        flag('review', 'Patient is on a statin and pre-statin lipids were not entered, so this is an on-treatment estimate and may understate risk. Enter pre-statin total cholesterol and HDL-C for a statin-naive estimate.', ['PREVENT_2024', 'PHYSICIAN_LEAD']);
       }
     }
 
@@ -110,6 +116,16 @@ export function recommend(pt) {
 
     // ---- 3. CAC ----------------------------------------------------------
     out.cac = interpretCac(pt, out, { raise, goal, flag });
+  }
+
+  // ---- 3b. Reduction from pre-treatment baseline -------------------------
+  if (onStatin && Number.isFinite(pt.untreatedLdl) && Number.isFinite(pt.ldl) && pt.untreatedLdl > 0) {
+    const achieved = 1 - pt.ldl / pt.untreatedLdl;
+    out.achievedReduction = achieved;
+    const needs50 = out.pathway !== 'primary' || out.tier === 'high';
+    const msg = `LDL-C is ${Math.round(achieved * 100)}% lower than the pre-treatment value (${pt.untreatedLdl} \u2192 ${pt.ldl} mg/dL).`;
+    if (needs50 && achieved < 0.5) flag('warning', `${msg} The \u226550% reduction target has not been met.`, ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018']);
+    else flag('info', msg, ['CHOLESTEROL_2018']);
   }
 
   // ---- 4. Risk enhancers (informational) --------------------------------
@@ -271,7 +287,9 @@ function buildPlan(pt, out, flag) {
     const sequence = [];
     if (!ther.ezetimibe) sequence.push('ezetimibe');
     if (pt.statinIntolerance && !ther.bempedoic) sequence.push('bempedoic');
-    const pcsk9Appropriate = out.pathway !== 'primary' || pt.statinIntolerance;
+    // Physician-lead decision: also suggest PCSK9 mAb in high-risk primary prevention (goal <70), citing VESALIUS-CV.
+    const highRiskPrimary = out.pathway === 'primary' && g != null && g <= 70;
+    const pcsk9Appropriate = out.pathway !== 'primary' || pt.statinIntolerance || highRiskPrimary;
     if (!ther.pcsk9 && !ther.inclisiran && pcsk9Appropriate) sequence.push('pcsk9mab');
 
     const prefix = pendingStep ? 'If LDL-C remains above goal at recheck, add' : 'Add';
@@ -285,10 +303,13 @@ function buildPlan(pt, out, flag) {
         text: `${prefix} ${d.name} (${d.dose}). ${d.effectNote}`,
         projectedFrom: from != null ? Math.round(from) : null,
         projectedLdl: est != null ? Math.round(est) : null,
-        evidence: d.evidence,
+        evidence: key === 'pcsk9mab' && highRiskPrimary ? [...d.evidence, 'VESALIUS_CV', 'PHYSICIAN_LEAD'] : d.evidence,
       });
+      if (key === 'pcsk9mab' && highRiskPrimary) {
+        flag('info', 'PCSK9 mAb in primary prevention: VESALIUS-CV showed fewer first major events (3-point MACE HR 0.75). Many trial participants had coronary, peripheral or cerebrovascular atherosclerosis without prior MI or stroke, and all had LDL-C \u226590 mg/dL on therapy. Check payer criteria.', ['VESALIUS_CV']);
+      }
     }
-    if (out.pathway === 'primary' && !pt.statinIntolerance && (est == null || est > g)) {
+    if (out.pathway === 'primary' && !pt.statinIntolerance && !highRiskPrimary && (est == null || est > g)) {
       flag('review', 'If LDL-C remains above goal after maximally tolerated statin + ezetimibe, use of PCSK9 inhibitors or other agents in primary prevention (without severe hypercholesterolemia) requires clinician/specialist judgment.', ['ECDP_2022']);
     }
   }

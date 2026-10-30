@@ -30,6 +30,7 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 | CAC 0 → rescan in 5 years | clinician-confirmed |
 | All clinical ASCVD → LDL-C <55 | clinician-confirmed |
 | LDL-C ≥190 / FH → LDL-C <70 and ≥50% reduction | clinician-confirmed |
+| On a statin: use pre-statin TC/HDL-C for PREVENT when entered | clinician-confirmed |
 
 ## 2018 AHA/ACC cholesterol guideline (Grundy et al., Circulation 2019)
 | Rule | Status |
@@ -48,6 +49,7 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 | PCSK9 mAb | 59% | FOURIER (Sabatine, NEJM 2017) |
 | Bempedoic acid 180 mg | 21% | CLEAR Outcomes (Nissen, NEJM 2023) |
 | Inclisiran 284 mg | ~50% | ORION-10/11 (Ray, NEJM 2020) |
+| PCSK9 mAb in high-risk primary prevention | VESALIUS-CV (NEJM 2025): 3-point MACE HR 0.75. secondary-source; clinician-confirmed for use |
 | Sequencing | statin → ezetimibe → PCSK9 mAb (or bempedoic acid if statin-intolerant) | 2022 ACC ECDP (Lloyd-Jones, JACC 2022) |
 
 Statin projections use the **low end** of each intensity range (moderate 30%, high 50%). That errs toward expecting less effect, so the app suggests add-on therapy sooner rather than later.

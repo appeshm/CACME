@@ -102,6 +102,26 @@ test('rosuvastatin renal warning when eGFR <30', async () => {
   assert.ok(statinStep.safety.some((t) => t.includes('do not exceed 10 mg')));
 });
 
+test('pre-statin lipids give a statin-naive risk estimate', () => {
+  const ther = { statinDrug: 'Atorvastatin', statinDose: 20 };
+  const treated = recommend({ ...pp, totalCholesterol: 160, hdl: 50, currentTherapy: ther });
+  const naive = recommend({ ...pp, totalCholesterol: 160, hdl: 50, untreatedTotalCholesterol: 240, untreatedHdl: 50, currentTherapy: ther });
+  assert.ok(naive.risk.ascvd > treated.risk.ascvd);
+  assert.ok(treated.flags.some((f) => f.text.includes('pre-statin lipids were not entered')));
+});
+
+test('warns when >=50% reduction from baseline is not met (secondary prevention)', () => {
+  const r = recommend({ ...pp, clinicalAscvd: true, ldl: 90, untreatedLdl: 150, currentTherapy: { statinDrug: 'Rosuvastatin', statinDose: 20 } });
+  assert.ok(r.flags.some((f) => f.level === 'warning' && f.text.includes('40% lower')));
+});
+
+test('high-risk primary prevention gets PCSK9 mAb after ezetimibe (VESALIUS-CV)', () => {
+  const r = recommend({ ...pp, ldl: 140, cac: { score: 400 }, currentTherapy: { statinDrug: 'Atorvastatin', statinDose: 80 } });
+  const step = r.plan.find((s) => s.drug === 'pcsk9mab');
+  assert.ok(step);
+  assert.ok(step.evidence.includes('VESALIUS_CV'));
+});
+
 test('patient at goal on statin is told to continue', () => {
   const r = recommend({ ...pp, ldl: 80, cac: { score: 45 }, currentTherapy: { statinDrug: 'Atorvastatin', statinDose: 20 } });
   assert.ok(r.plan.some((s) => s.text.includes('at goal')));

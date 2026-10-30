@@ -50,6 +50,12 @@ export const EVIDENCE = Object.freeze({
     status: 'verified',
     note: 'Outcome benefit after ACS. LDL-C effect not used for numeric projections in this app.',
   },
+  VESALIUS_CV: {
+    cite: 'VESALIUS-CV (TIMI 66): Evolocumab in high-risk patients without prior myocardial infarction or stroke. N Engl J Med. Published online November 8, 2025.',
+    doi: null,
+    status: 'secondary-source',
+    note: '12,257 patients, median 4.6 y. 3-point MACE HR 0.75 (0.65\u20130.86). Enrollment required LDL-C \u226590 mg/dL; many had CAD, PAD or cerebrovascular disease without MI/stroke. True primary-prevention subgroup (diabetes without known atherosclerosis): HR 0.69.',
+  },
   CLEAR_OUTCOMES: {
     cite: 'Nissen SE, Lincoff AM, Brennan D, et al. Bempedoic Acid and Cardiovascular Outcomes in Statin-Intolerant Patients. N Engl J Med. 2023;388:1353–1364.',
     doi: '10.1056/NEJMoa2215024',
