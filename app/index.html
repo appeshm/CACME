@@ -46,16 +46,23 @@
         <p class="hint">Used to set the LDL-C goal. Leave blank if not yet done; the plan will prompt for it.</p>
       </fieldset>
 
-      <fieldset data-section="patient">
-        <legend>Risk calculation (PREVENT)</legend>
-        <div class="row">
-          <label class="f">Sex (at birth)<select id="sex"><option value="female">Female</option><option value="male">Male</option></select><span class="prov" data-prov="sex"></span></label>
-          <label class="f">Age <span class="unit">years, 30&ndash;79</span><input id="age" type="number" inputmode="decimal"><span class="prov" data-prov="age"></span></label>
-          <label class="f">Total cholesterol <span class="unit">mg/dL</span><input id="totalCholesterol" type="number" inputmode="decimal"><span class="prov" data-prov="totalCholesterol"></span></label>
-          <label class="f">HDL-C <span class="unit">mg/dL</span><input id="hdl" type="number" inputmode="decimal"><span class="prov" data-prov="hdl"></span></label>
-          <label class="f">Systolic BP <span class="unit">mmHg</span><input id="sbp" type="number" inputmode="decimal"><span class="prov" data-prov="sbp"></span></label>
-          <label class="f">BMI <span class="unit">optional, HF risk only</span><input id="bmi" type="number" inputmode="decimal" step="0.1"><span class="prov" data-prov="bmi"></span></label>
+      <fieldset data-section="prevent">
+        <legend>10-year risk (PREVENT)</legend>
+        <p class="hint" data-section="preventOptional" hidden>Optional: the CAC score already sets the LDL-C goal. Fill in only if you want the risk numbers.</p>
+        <div class="modes" role="radiogroup" aria-label="How to get the PREVENT score">
+          <label class="chk"><input type="radio" name="preventMode" id="preventModeCalc" value="calc" checked> Calculate</label>
+          <label class="chk"><input type="radio" name="preventMode" id="preventModeKnown" value="known"> Enter score from chart</label>
         </div>
+        <div class="row">
+          <label class="f" data-section="preventKnown" hidden>PREVENT-ASCVD <span class="unit">10-year, %</span><input id="knownPreventAscvd" type="number" inputmode="decimal" step="0.1" min="0" max="100"></label>
+          <label class="f" data-section="patient">Age <span class="unit">years, 30&ndash;79</span><input id="age" type="number" inputmode="decimal"><span class="prov" data-prov="age"></span></label>
+          <label class="f" data-section="sexField">Sex (at birth)<select id="sex"><option value="female">Female</option><option value="male">Male</option></select><span class="prov" data-prov="sex"></span></label>
+          <label class="f" data-section="preventCalc">Total cholesterol <span class="unit">mg/dL</span><input id="totalCholesterol" type="number" inputmode="decimal"><span class="prov" data-prov="totalCholesterol"></span></label>
+          <label class="f" data-section="preventCalc">HDL-C <span class="unit">mg/dL</span><input id="hdl" type="number" inputmode="decimal"><span class="prov" data-prov="hdl"></span></label>
+          <label class="f" data-section="preventCalc">Systolic BP <span class="unit">mmHg</span><input id="sbp" type="number" inputmode="decimal"><span class="prov" data-prov="sbp"></span></label>
+          <label class="f" data-section="preventCalc">BMI <span class="unit">optional, HF risk only</span><input id="bmi" type="number" inputmode="decimal" step="0.1"><span class="prov" data-prov="bmi"></span></label>
+        </div>
+        <p class="hint" data-section="preventKnown" hidden>Use the 10-year PREVENT-ASCVD value (not total CVD, not the older Pooled Cohort Equations).</p>
       </fieldset>
 
       <fieldset data-section="riskHistory">

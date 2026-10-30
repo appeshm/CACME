@@ -60,6 +60,9 @@ The goal columns (<100 / <70 / <55), CAC, diabetes, LDL-C ≥190, ASCVD, ApoB an
 
 ## Question order
 The form asks only what can change the LDL-C goal or the medicine choice: clinical ASCVD → LDL-C ≥190 / FH → CAC → PREVENT → tier-specific questions. Logic: `src/engine/workflow.js`. BMI is optional (it only feeds the heart-failure estimate).
+- **Entered PREVENT score:** in primary prevention the clinician can type the 10-year PREVENT-ASCVD % from the chart instead of calculating it. Only age is then needed (several rules depend on age). The app reminds the user to confirm it is PREVENT-ASCVD (not total CVD or the Pooled Cohort Equations) and flags a statin-treated score.
+- PREVENT inputs stay visible in primary prevention; when CAC ≥100 they are marked optional (risk shown for information).
+- Diabetes, smoking and BP treatment are asked in primary prevention and LDL-C ≥190 / FH (they affect the goal, the apoB goal and the risk-factor rules).
 
 ## Nonstatin therapy
 | Drug | Effect used for projections | Source |

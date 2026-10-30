@@ -11,6 +11,8 @@ export function visibleSections(pt, result = null) {
   const primary = !ascvd && !severe;
   const score = pt.cac?.score;
   const cacSettles = primary && cacSettlesGoal(pt);
+  const knownMode = pt.preventMode === 'known';
+  // PREVENT stays visible in primary prevention; it is optional once CAC ≥100 sets the goal.
   const needPrevent = primary && !cacSettles;
   const onStatin = Boolean(pt.currentTherapy?.statinDrug);
   const tier = result?.tier ?? null;
@@ -26,7 +28,7 @@ export function visibleSections(pt, result = null) {
   if (ascvd) skipped.push('PREVENT, CAC and most risk enhancers (clinical ASCVD sets the goal)');
   if (severe) skipped.push('PREVENT (LDL-C ≥190 / FH sets the goal)');
   if (severe && pt.fh) skipped.push('CAC (not indicated in FH)');
-  if (cacSettles) skipped.push(`PREVENT inputs (CAC ${score} already sets the goal)`);
+  if (cacSettles) skipped.push(`nothing required for PREVENT (CAC ${score} already sets the goal; risk is shown for information if entered)`);
   if (primary && tier === 'high' && !cacSettles) skipped.push('risk enhancers (high risk already sets goal <70)');
 
   return {
@@ -34,11 +36,15 @@ export function visibleSections(pt, result = null) {
     ascvdDetails: ascvd,
     cac: primary || (severe && !pt.fh),
     cacPercentile: (primary || (severe && !pt.fh)) && Number.isFinite(score) && score >= 1 && score < GUIDELINE.cac.elevated.min,
-    patient: needPrevent,
-    prevent: needPrevent,
-    riskHistory: needPrevent || severe,
-    diabetesModifiers: needPrevent && Boolean(pt.diabetes),
-    preStatinTcHdl: needPrevent && onStatin,
+    patient: primary,                       // age (rules by age) + sex
+    sexField: primary && !knownMode,        // sex only needed to calculate
+    prevent: primary,
+    preventOptional: cacSettles,
+    preventCalc: primary && !knownMode,
+    preventKnown: primary && knownMode,
+    riskHistory: primary || severe,         // diabetes, smoking, BP meds: cheap and affect goal/apoB
+    diabetesModifiers: primary && Boolean(pt.diabetes),
+    preStatinTcHdl: primary && !knownMode && onStatin,
     preStatinLdl: onStatin,
     statinDose: onStatin,
     enhancers,

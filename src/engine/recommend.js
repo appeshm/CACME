@@ -110,9 +110,27 @@ export function recommend(pt) {
 
   // ---- 2. PREVENT (primary prevention only) -----------------------------
   if (out.pathway === 'primary') {
-    const errs = validatePreventInputs(preventInput);
+    const known = pt.knownPreventAscvd;
+    const errs = Number.isFinite(known) ? [] : validatePreventInputs(preventInput);
     const cacSetsGoal = cacSettlesGoal(pt);
-    if (errs.length && cacSetsGoal) {
+    if (Number.isFinite(known)) {
+      // Score entered from the chart (10-year PREVENT-ASCVD, %).
+      if (known <= 0 || known >= 100) {
+        out.riskErrors = ['Entered PREVENT-ASCVD score must be a percentage between 0 and 100.'];
+        flag('review', out.riskErrors[0], ['PREVENT_2024']);
+      } else {
+        out.risk = { model: 'PREVENT-ASCVD 10-year, entered from chart', entered: true, ascvd: known / 100, totalCvd: null, heartFailure: null };
+        addEv(['PREVENT_2024']);
+        const tier = tierFor(out.risk.ascvd);
+        out.tier = tier.id;
+        const plan = GUIDELINE.tierPlan[tier.id];
+        raise(plan.statin, `${tier.label} 10-year PREVENT-ASCVD risk (entered): ${plan.text}`, plan.evidence);
+        if (plan.ldlGoal != null) goal(plan.ldlGoal, `${tier.label} risk tier`, plan.evidence);
+        flag('info', 'Risk entered from the chart. Confirm it is the 10-year PREVENT-ASCVD estimate (not total CVD and not the older Pooled Cohort Equations).', ['PREVENT_2024', 'DYSLIPIDEMIA_2026']);
+        if (onStatin) flag('review', 'Patient is on a statin: check whether the chart score was calculated as statin-treated, which may understate risk for treatment decisions.', ['PREVENT_2024']);
+        if (Number.isFinite(pt.age) && (pt.age < 30 || pt.age > 79)) flag('warning', 'PREVENT is validated for ages 30\u201379 only.', ['PREVENT_2024']);
+      }
+    } else if (errs.length && cacSetsGoal) {
       out.preventSkipped = true;
       flag('info', `PREVENT not needed: CAC ${pt.cac.score} AU already sets the LDL-C goal (the guideline applies PREVENT to adults without subclinical atherosclerosis).`, ['DYSLIPIDEMIA_2026']);
     } else if (errs.length) {

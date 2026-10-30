@@ -19,10 +19,13 @@ test('FH hides PREVENT and CAC; LDL-C >=190 without FH still asks CAC', () => {
   assert.equal(v.riskHistory, true);
 });
 
-test('primary prevention always asks CAC; CAC >=100 hides PREVENT', () => {
+test('primary prevention always asks CAC; CAC >=100 makes PREVENT optional', () => {
   assert.equal(visibleSections({ ldl: 130 }).cac, true);
   assert.equal(visibleSections({ ldl: 130 }).prevent, true);
-  assert.equal(visibleSections({ ldl: 130, cac: { score: 150 } }).prevent, false);
+  const v = visibleSections({ ldl: 130, cac: { score: 150 } });
+  assert.equal(v.prevent, true);          // still shown...
+  assert.equal(v.preventOptional, true);  // ...but optional
+  assert.equal(v.riskHistory, true);
   assert.equal(visibleSections({ ldl: 130, cac: { score: 40 } }).cacPercentile, true);
 });
 
@@ -60,4 +63,27 @@ test('statin intolerant, small gap: bempedoic acid first', () => {
   const drugs = r.plan.filter((s) => s.kind === 'nonstatin').map((s) => s.drug);
   assert.equal(drugs[0], 'bempedoic');
   assert.ok(!drugs.includes('ezetimibe') || drugs.indexOf('ezetimibe') > 0);
+});
+
+test('entered PREVENT score sets the tier without cholesterol/BP inputs', () => {
+  const r = recommend({ ldl: 140, egfr: 85, age: 60, knownPreventAscvd: 12, cac: { score: 20 } });
+  assert.equal(r.tier, 'high');
+  assert.equal(r.ldlGoal.value, 70);
+  assert.equal(r.risk.entered, true);
+  assert.equal(r.riskErrors.length, 0);
+});
+
+test('entered score mode hides calculation fields but keeps age and risk factors', () => {
+  const v = visibleSections({ ldl: 140, preventMode: 'known' });
+  assert.equal(v.preventCalc, false);
+  assert.equal(v.preventKnown, true);
+  assert.equal(v.patient, true);
+  assert.equal(v.sexField, false);
+  assert.equal(v.riskHistory, true);
+});
+
+test('entered score out of range is rejected', () => {
+  const r = recommend({ ldl: 140, egfr: 85, age: 60, knownPreventAscvd: 150 });
+  assert.equal(r.tier, null);
+  assert.ok(r.riskErrors.length > 0);
 });

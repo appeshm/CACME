@@ -111,3 +111,4 @@ ol.plan .safety { color: var(--crit); font-size: 0.82rem; display: block; }
 .hint { margin: 0; font-size: 0.8rem; color: var(--muted); }
 .pathway { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
 .pathway:empty { display: none; }
+.modes { display: flex; flex-wrap: wrap; gap: 6px 18px; }

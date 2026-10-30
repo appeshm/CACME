@@ -4,7 +4,7 @@ import { EVIDENCE } from '../src/engine/evidence.js';
 import { visibleSections } from '../src/engine/workflow.js';
 
 const $ = (id) => document.getElementById(id);
-const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'triglycerides', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
+const NUM = ['knownPreventAscvd', 'age', 'totalCholesterol', 'hdl', 'ldl', 'triglycerides', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
 const BOOL = ['diabetes', 'diabetesModifiers', 'smoker', 'onBpMeds', 'clinicalAscvd', 'veryHighRisk', 'fh', 'statinIntolerance', 'lpaMeasured'];
 const THER = ['ezetimibe', 'pcsk9', 'inclisiran', 'bempedoic'];
 
@@ -40,6 +40,7 @@ function applyVisibility(v) {
 
 function fill(d, provenance = {}) {
   $('sex').value = d.sex || 'female';
+  $(d.preventMode === 'known' ? 'preventModeKnown' : 'preventModeCalc').checked = true;
   NUM.forEach((k) => { $(k).value = d[k] ?? ''; });
   BOOL.forEach((k) => { $(k).checked = Boolean(d[k]); });
   $('cac').value = d.cac ?? d.cacScore ?? '';
@@ -54,7 +55,7 @@ function fill(d, provenance = {}) {
 
 function read() {
   const n = (id) => { const el = $(id); const v = el.value.trim(); return v === '' || !isShown(el) ? undefined : Number(v); };
-  const pt = { sex: $('sex').value };
+  const pt = { sex: $('sex').value, preventMode: $('preventModeKnown').checked ? 'known' : 'calc' };
   NUM.forEach((k) => { pt[k] = n(k); });
   BOOL.forEach((k) => { pt[k] = $(k).checked && isShown($(k)); });
   const cac = n('cac');
@@ -80,7 +81,11 @@ function scale(risk) {
 
 function renderClin(r) {
   const parts = [];
-  if (r.pathway === 'primary' && r.risk) {
+  if (r.pathway === 'primary' && r.risk?.entered) {
+    parts.push(`<div class="card"><h2>10-year risk &middot; PREVENT (from chart)</h2>
+      <div class="risknums"><div><span class="v main">${pct(r.risk.ascvd)}</span><span class="k">ASCVD (entered)</span></div></div>${scale(r.risk.ascvd)}
+      <p style="margin:8px 0 0">Risk tier: <span class="pill ${r.tier}">${TIER_LABEL[r.tier]}</span></p></div>`);
+  } else if (r.pathway === 'primary' && r.risk) {
     parts.push(`<div class="card"><h2>10-year risk &middot; PREVENT</h2>
       <div class="risknums">
         <div><span class="v main">${pct(r.risk.ascvd)}</span><span class="k">ASCVD</span></div>
