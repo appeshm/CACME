@@ -53,6 +53,14 @@ The goal columns (<100 / <70 / <55), CAC, diabetes, LDL-C ≥190, ASCVD, ApoB an
 | Risk enhancer list | verified |
 | Recheck lipids 4–12 weeks after starting or changing therapy | verified |
 
+## Physician-lead policies (2026-10-30)
+- **Ezetimibe first:** ezetimibe is always the first add-on before a PCSK9 mAb, whatever the gap to goal. (The guideline allows "ezetimibe and/or PCSK9 mAb" in very high risk; this is a stricter local choice.)
+- **Statin intolerance:** first add-on is a non-ezetimibe drug chosen by the gap to goal: bempedoic acid if the needed LDL-C reduction is ≤21% (its CLEAR Outcomes effect), otherwise a PCSK9 mAb. Ezetimibe comes next.
+- **CAC in primary prevention:** always requested (except FH, where the guideline says it is not indicated) and used to set the LDL-C goal. When CAC ≥100 AU or ≥75th percentile, PREVENT is not needed for the goal and its inputs are not asked.
+
+## Question order
+The form asks only what can change the LDL-C goal or the medicine choice: clinical ASCVD → LDL-C ≥190 / FH → CAC → PREVENT → tier-specific questions. Logic: `src/engine/workflow.js`. BMI is optional (it only feeds the heart-failure estimate).
+
 ## Nonstatin therapy
 | Drug | Effect used for projections | Source |
 |---|---|---|

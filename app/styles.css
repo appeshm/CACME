@@ -31,6 +31,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; margin: 0; }
 .wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -106,3 +107,7 @@ ol.plan .safety { color: var(--crit); font-size: 0.82rem; display: block; }
 .patient p { margin: 0 0 8px; max-width: 62ch; font-size: 1rem; }
 .foot { margin-top: 28px; color: var(--muted); font-size: 0.78rem; max-width: 75ch; }
 @media (prefers-reduced-motion: no-preference) { .scale .marker i { transition: left 0.3s ease; } }
+
+.hint { margin: 0; font-size: 0.8rem; color: var(--muted); }
+.pathway { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+.pathway:empty { display: none; }

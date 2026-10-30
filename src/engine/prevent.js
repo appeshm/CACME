@@ -86,6 +86,8 @@ export function validatePreventInputs(p) {
   if (p.sex !== 'female' && p.sex !== 'male') errors.push('Sex must be "female" or "male".');
   for (const [key, [lo, hi]] of Object.entries(PREVENT_INPUT_LIMITS)) {
     const v = p[key];
+    // BMI is only used by the heart-failure equation; it is optional for CVD/ASCVD risk.
+    if (key === 'bmi' && (v === undefined || v === null)) continue;
     if (typeof v !== 'number' || !Number.isFinite(v)) {
       errors.push(`${key} is required.`);
     } else if (v < lo || v > hi) {
@@ -162,7 +164,8 @@ export function calculatePrevent10yr(p) {
     model: 'PREVENT base model, 10-year (Khan et al., Circulation 2024)',
     totalCvd: logistic(linearPredictor(c.cvd, t)),
     ascvd: logistic(linearPredictor(c.ascvd, t)),
-    heartFailure: logistic(linearPredictor(c.hf, t)),
+    // null when BMI was not provided
+    heartFailure: Number.isFinite(p.bmi) ? logistic(linearPredictor(c.hf, t)) : null,
   };
 }
 

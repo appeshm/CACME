@@ -5,6 +5,8 @@ Clinical decision support for primary care. It estimates cardiovascular risk wit
 > Decision support only. Not FDA-cleared. Not validated for clinical use. See `docs/VALIDATION.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## How it decides
+The form asks only what can change the LDL-C goal or the medicine choice, in this order: clinical ASCVD → LDL-C ≥190 / FH → CAC → PREVENT → tier-specific questions.
+
 1. **Pathway.** Clinical ASCVD → secondary prevention. LDL-C ≥190 or FH → severe hypercholesterolemia. Otherwise → primary prevention.
 2. **Risk.** PREVENT base model, 10-year ASCVD / total CVD / heart failure. It refuses to calculate outside the validated input ranges.
 3. **Tier.** 2026 ACC/AHA tiers: low <3%, borderline 3–<5%, intermediate 5–<10%, high ≥10%.
@@ -35,7 +37,7 @@ Manual entry only on the public site; the Epic (SMART on FHIR) launch needs a re
 
 ## Run it
 ```
-npm test                       # 42 unit tests
+npm test                       # 50 unit tests
 npm start                      # then open http://localhost:8080/app/
 node tools/build-preview.mjs   # single-file demo in dist/
 ```

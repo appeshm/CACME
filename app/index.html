@@ -15,76 +15,91 @@
     <h1>CAC<span>ME</span> Prevention Planner</h1>
     <p>PREVENT risk &rarr; CAC refinement &rarr; LDL-C goal &rarr; therapy</p>
   </header>
-  <div class="banner" id="banner"><strong>Example patient loaded.</strong> Decision support for clinicians, not a substitute for clinical judgment. Items marked <em>review</em> are not yet verified against the full 2026 guideline text and are never applied automatically.</div>
+  <div class="banner" id="banner"><strong>Example patient loaded.</strong> Decision support for clinicians, not a substitute for clinical judgment. Rules are cross-checked against the full 2026 ACC/AHA dyslipidemia guideline; items marked <em>review</em> need your judgment and are never applied automatically.</div>
   <div class="grid">
     <form id="form" novalidate>
       <fieldset>
-        <legend>Patient</legend>
+        <legend>Start here</legend>
+        <div class="chks">
+          <label class="chk"><input id="clinicalAscvd" type="checkbox"> Clinical ASCVD (ACS, MI, angina, revascularization, stroke/TIA, PAD, aortic aneurysm)</label>
+          <label class="chk"><input id="fh" type="checkbox"> Familial hypercholesterolemia (clinical or genetic)</label>
+        </div>
+        <div class="row">
+          <label class="f">LDL-C <span class="unit">mg/dL, current</span><input id="ldl" type="number" inputmode="decimal"><span class="prov" data-prov="ldl"></span></label>
+          <label class="f">eGFR <span class="unit">mL/min/1.73m&sup2;</span><input id="egfr" type="number" inputmode="decimal"><span class="prov" data-prov="egfr"></span></label>
+        </div>
+        <p class="pathway" id="pathwayNote"></p>
+      </fieldset>
+
+      <fieldset data-section="ascvdDetails" hidden>
+        <legend>Very high risk?</legend>
+        <label class="chk"><input id="veryHighRisk" type="checkbox"> &ge;2 major events (ACS in past 12 mo, prior MI, ischemic stroke, symptomatic PAD), or 1 major event + multiple high-risk conditions (age &gt;65, revascularization, smoker, diabetes, HF, hypertension, LDL-C &gt;100 on statin + ezetimibe)</label>
+        <p class="hint">CKD stage 3+ (eGFR &lt;60) and FH count as very high risk automatically.</p>
+      </fieldset>
+
+      <fieldset data-section="cac">
+        <legend>Coronary artery calcium</legend>
+        <div class="row">
+          <label class="f">Agatston score <span class="unit">AU</span><input id="cac" type="number" inputmode="numeric" min="0"></label>
+          <label class="f" data-section="cacPercentile" hidden>Percentile <span class="unit">MESA, optional</span><input id="cacPercentile" type="number" inputmode="numeric" min="0" max="100"></label>
+        </div>
+        <p class="hint">Used to set the LDL-C goal. Leave blank if not yet done; the plan will prompt for it.</p>
+      </fieldset>
+
+      <fieldset data-section="patient">
+        <legend>Risk calculation (PREVENT)</legend>
         <div class="row">
           <label class="f">Sex (at birth)<select id="sex"><option value="female">Female</option><option value="male">Male</option></select><span class="prov" data-prov="sex"></span></label>
           <label class="f">Age <span class="unit">years, 30&ndash;79</span><input id="age" type="number" inputmode="decimal"><span class="prov" data-prov="age"></span></label>
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Lipids</legend>
-        <div class="row">
           <label class="f">Total cholesterol <span class="unit">mg/dL</span><input id="totalCholesterol" type="number" inputmode="decimal"><span class="prov" data-prov="totalCholesterol"></span></label>
           <label class="f">HDL-C <span class="unit">mg/dL</span><input id="hdl" type="number" inputmode="decimal"><span class="prov" data-prov="hdl"></span></label>
-          <label class="f">LDL-C <span class="unit">mg/dL</span><input id="ldl" type="number" inputmode="decimal"><span class="prov" data-prov="ldl"></span></label>
-          <label class="f">Triglycerides <span class="unit">mg/dL, optional</span><input id="triglycerides" type="number" inputmode="decimal"><span class="prov" data-prov="triglycerides"></span></label>
-        </div>
-        <label class="chk"><input id="lpaMeasured" type="checkbox"> Lp(a) has been measured</label>
-      </fieldset>
-      <fieldset>
-        <legend>Blood pressure, body, kidney</legend>
-        <div class="row">
           <label class="f">Systolic BP <span class="unit">mmHg</span><input id="sbp" type="number" inputmode="decimal"><span class="prov" data-prov="sbp"></span></label>
-          <label class="f">BMI <span class="unit">kg/m&sup2;</span><input id="bmi" type="number" inputmode="decimal" step="0.1"><span class="prov" data-prov="bmi"></span></label>
-          <label class="f">eGFR <span class="unit">mL/min/1.73m&sup2;</span><input id="egfr" type="number" inputmode="decimal"><span class="prov" data-prov="egfr"></span></label>
+          <label class="f">BMI <span class="unit">optional, HF risk only</span><input id="bmi" type="number" inputmode="decimal" step="0.1"><span class="prov" data-prov="bmi"></span></label>
         </div>
       </fieldset>
-      <fieldset>
-        <legend>History</legend>
+
+      <fieldset data-section="riskHistory">
+        <legend>Risk factors</legend>
         <div class="chks">
           <label class="chk"><input id="diabetes" type="checkbox"> Diabetes</label>
-          <label class="chk"><input id="diabetesModifiers" type="checkbox"> Diabetes with multiple ASCVD risk factors or diabetes-specific risk enhancers (&ge;10 y type 2 / &ge;20 y type 1, albuminuria, eGFR &lt;60, retinopathy, neuropathy, ABI &lt;0.9)</label>
+          <label class="chk" data-section="diabetesModifiers" hidden><input id="diabetesModifiers" type="checkbox"> Diabetes with multiple ASCVD risk factors or diabetes-specific risk enhancers (&ge;10 y type 2 / &ge;20 y type 1, albuminuria, eGFR &lt;60, retinopathy, neuropathy, ABI &lt;0.9)</label>
           <label class="chk"><input id="smoker" type="checkbox"> Current smoker</label>
           <label class="chk"><input id="onBpMeds" type="checkbox"> On blood-pressure medication</label>
-          <label class="chk"><input id="clinicalAscvd" type="checkbox"> Clinical ASCVD (MI, stroke, PAD, revascularization)</label>
-          <label class="chk"><input id="veryHighRisk" type="checkbox"> Very high risk ASCVD: &ge;2 major events (ACS in past 12 mo, prior MI, ischemic stroke, symptomatic PAD), or 1 major event + multiple high-risk conditions (age &gt;65, revascularization, smoker, diabetes, HF, hypertension, LDL-C &gt;100 on statin + ezetimibe)</label>
-          <label class="chk"><input id="fh" type="checkbox"> Familial hypercholesterolemia</label>
-          <label class="chk"><input id="statinIntolerance" type="checkbox"> Statin intolerance</label>
         </div>
       </fieldset>
-      <fieldset>
-        <legend>Coronary artery calcium</legend>
-        <div class="row">
-          <label class="f">Agatston score <span class="unit">blank if not done</span><input id="cac" type="number" inputmode="numeric" min="0"></label>
-          <label class="f">Percentile <span class="unit">MESA, optional</span><input id="cacPercentile" type="number" inputmode="numeric" min="0" max="100"></label>
-        </div>
-      </fieldset>
+
       <fieldset>
         <legend>Current lipid therapy</legend>
         <div class="row">
           <label class="f">Statin<select id="statinDrug"><option value="">None</option><option>Atorvastatin</option><option>Rosuvastatin</option><option>Simvastatin</option><option>Pravastatin</option><option>Lovastatin</option><option>Fluvastatin XL</option><option>Fluvastatin</option><option>Pitavastatin</option></select></label>
-          <label class="f">Dose <span class="unit">mg daily</span><input id="statinDose" type="number" inputmode="decimal"></label>
-        </div>
-        <div class="row">
-          <label class="f">Pre-statin total chol. <span class="unit">mg/dL, optional</span><input id="untreatedTotalCholesterol" type="number" inputmode="decimal"></label>
-          <label class="f">Pre-statin HDL-C <span class="unit">mg/dL, optional</span><input id="untreatedHdl" type="number" inputmode="decimal"></label>
-          <label class="f">Pre-statin LDL-C <span class="unit">mg/dL, optional</span><input id="untreatedLdl" type="number" inputmode="decimal"></label>
+          <label class="f" data-section="statinDose" hidden>Dose <span class="unit">mg daily</span><input id="statinDose" type="number" inputmode="decimal"></label>
+          <label class="f" data-section="preStatinTcHdl" hidden>Pre-statin total chol. <span class="unit">mg/dL, optional</span><input id="untreatedTotalCholesterol" type="number" inputmode="decimal"></label>
+          <label class="f" data-section="preStatinTcHdl" hidden>Pre-statin HDL-C <span class="unit">mg/dL, optional</span><input id="untreatedHdl" type="number" inputmode="decimal"></label>
+          <label class="f" data-section="preStatinLdl" hidden>Pre-statin LDL-C <span class="unit">mg/dL, optional</span><input id="untreatedLdl" type="number" inputmode="decimal"></label>
         </div>
         <div class="chks">
+          <label class="chk"><input id="statinIntolerance" type="checkbox"> Statin intolerance</label>
           <label class="chk"><input id="ezetimibe" type="checkbox"> Ezetimibe</label>
           <label class="chk"><input id="pcsk9" type="checkbox"> PCSK9 mAb</label>
           <label class="chk"><input id="inclisiran" type="checkbox"> Inclisiran</label>
           <label class="chk"><input id="bempedoic" type="checkbox"> Bempedoic acid</label>
         </div>
       </fieldset>
-      <fieldset>
+
+      <fieldset data-section="enhancers">
         <legend>Risk enhancers</legend>
         <div class="chks" id="enhancers"></div>
       </fieldset>
+
+      <fieldset>
+        <legend>Optional</legend>
+        <div class="row">
+          <label class="f">Triglycerides <span class="unit">mg/dL, for apoB goal</span><input id="triglycerides" type="number" inputmode="decimal"><span class="prov" data-prov="triglycerides"></span></label>
+        </div>
+        <label class="chk"><input id="lpaMeasured" type="checkbox"> Lp(a) has been measured</label>
+      </fieldset>
+
+      <p class="hint" id="skippedNote" hidden></p>
       <div class="actions">
         <button type="submit" class="primary">Update results</button>
         <button type="button" id="clear">Clear form</button>

@@ -9,7 +9,7 @@ const strip = (src) => src
 
 const modules = [
   'src/engine/evidence.js', 'src/engine/guideline-config.js', 'src/engine/prevent.js',
-  'src/engine/therapies.js', 'src/engine/recommend.js', 'app/main.js',
+  'src/engine/therapies.js', 'src/engine/recommend.js', 'src/engine/workflow.js', 'app/main.js',
 ];
 const js = modules.map((m) => `// ---- ${m}\n${strip(r(m))}`).join('\n');
 const index = r('app/index.html');

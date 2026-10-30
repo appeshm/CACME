@@ -77,7 +77,7 @@ export function recommend(pt) {
     if (out.veryHighRisk) {
       const rule = sp.ldlGoalVeryHighRisk;
       goal(rule.value, `Clinical ASCVD with ${vhrReasons.join(', ')}`, rule.evidence, rule.status);
-      flag('info', 'Very high risk: early nonstatin escalation (ezetimibe and/or PCSK9 mAb, bempedoic acid or inclisiran) if not at goal on maximally tolerated statin.', rule.evidence);
+      flag('info', 'Very high risk: escalate early if not at goal on maximally tolerated statin \u2014 ezetimibe first, then a PCSK9 mAb.', [...rule.evidence, 'PHYSICIAN_LEAD']);
     } else {
       const rule = sp.ldlGoalAscvd;
       goal(rule.value, 'Clinical ASCVD (not very high risk)', rule.evidence, rule.status);
@@ -100,6 +100,7 @@ export function recommend(pt) {
     goal(rule.value, why.length ? `LDL-C \u2265190 / FH with ${why.join('; ')}` : 'LDL-C \u2265190 without HeFH, risk factors or subclinical atherosclerosis', rule.evidence, rule.status);
     flag('info', `Goal: LDL-C <${rule.value} mg/dL AND \u2265${Math.round(sh.ldlGoal.minReduction * 100)}% reduction from untreated baseline.`, rule.evidence);
     if (pt.fh) flag('warning', 'HeFH: general-population risk tools (PREVENT) should not be used, and CAC = 0 does not justify deferring statin.', ['DYSLIPIDEMIA_2026']);
+    if (!pt.fh && !Number.isFinite(pt.cac?.score)) flag('review', 'CAC score not entered. Any coronary calcium lowers the goal for LDL-C \u2265190 from <100 to <70.', ['PHYSICIAN_LEAD', 'DYSLIPIDEMIA_2026']);
     flag('info', 'If LDL-C stays ≥100 mg/dL despite maximally tolerated statin ± ezetimibe, inclisiran is reasonable (COR 2a; outcome trials pending).', ['DYSLIPIDEMIA_2026']);
     if (rf.length) flag('review', `"Additional ASCVD risk factors" was taken to mean: ${rf.join(', ')}. Confirm this applies.`, ['GUIDELINE_2026_SUMMARY']);
     flag('info', 'Consider evaluation for familial hypercholesterolemia and cascade screening of relatives.', ['CHOLESTEROL_2018']);
@@ -110,7 +111,11 @@ export function recommend(pt) {
   // ---- 2. PREVENT (primary prevention only) -----------------------------
   if (out.pathway === 'primary') {
     const errs = validatePreventInputs(preventInput);
-    if (errs.length) {
+    const cacSetsGoal = cacSettlesGoal(pt);
+    if (errs.length && cacSetsGoal) {
+      out.preventSkipped = true;
+      flag('info', `PREVENT not needed: CAC ${pt.cac.score} AU already sets the LDL-C goal (the guideline applies PREVENT to adults without subclinical atherosclerosis).`, ['DYSLIPIDEMIA_2026']);
+    } else if (errs.length) {
       out.riskErrors = errs;
       flag('review', 'PREVENT could not be calculated (inputs missing or outside validated range). Risk tier requires clinician judgment.', ['PREVENT_2024']);
     } else {
@@ -237,10 +242,8 @@ function interpretCac(pt, out, { raise, goal, flag }) {
   const eligibleAge = pt.age >= (cfg.eligibleAge[pt.sex] ?? Infinity);
 
   if (res.score == null) {
-    if ((out.tier === 'borderline' || out.tier === 'intermediate') && eligibleAge) {
-      res.text = 'CAC scoring is reasonable here to refine the statin decision (borderline/intermediate risk, age eligible).';
-      flag('info', res.text, ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018']);
-    }
+    res.text = 'CAC score not entered. Obtain a CAC score: it is used to set the LDL-C goal for every primary-prevention patient.';
+    flag('review', res.text + (eligibleAge ? '' : ' (The guideline studies CAC mainly in men \u226540 and women \u226545; a score of 0 is less informative at younger ages.)'), ['PHYSICIAN_LEAD', 'DYSLIPIDEMIA_2026']);
     return res;
   }
 
@@ -330,7 +333,7 @@ function buildPlan(pt, out, flag) {
 
   // ---- Statin step ----
   if (pt.statinIntolerance) {
-    steps.push({ kind: 'statin', text: 'Statin intolerance reported. Consider re-challenge with a different statin, lower dose or alternate-day dosing; if not tolerated, use nonstatin therapy (ezetimibe, bempedoic acid, PCSK9 mAb).', evidence: ['ECDP_2022'] });
+    steps.push({ kind: 'statin', text: 'Statin intolerance reported. Consider re-challenge with a different statin, lower dose or alternate-day dosing. If not tolerated, start with a non-ezetimibe drug chosen by the LDL-C reduction needed (bempedoic acid if about 21% or less, otherwise a PCSK9 mAb), then add ezetimibe if still above goal.', evidence: ['ECDP_2022', 'DYSLIPIDEMIA_2026', 'PHYSICIAN_LEAD'] });
   } else if (!ther.statinDrug) {
     const grp = STATIN_INTENSITY[targetIntensity];
     let note = '';
@@ -365,16 +368,33 @@ function buildPlan(pt, out, flag) {
   // ---- Nonstatin add-ons (ECDP 2022 sequencing) ----
   const stillAbove = ldl != null && g != null && ldl > g && (est == null || est > g);
   if (stillAbove) {
-    const sequence = [];
-    if (!ther.ezetimibe) sequence.push('ezetimibe');
-    if (pt.statinIntolerance && !ther.bempedoic) sequence.push('bempedoic');
     // Physician-lead decision: also suggest PCSK9 mAb in high-risk primary prevention (goal <70), citing VESALIUS-CV.
     const highRiskPrimary = out.pathway === 'primary' && g != null && g <= 70;
     const pcsk9Appropriate = out.pathway !== 'primary' || pt.statinIntolerance || highRiskPrimary;
-    if (!ther.pcsk9 && !ther.inclisiran && pcsk9Appropriate) sequence.push('pcsk9mab');
+    const canPcsk9 = !ther.pcsk9 && !ther.inclisiran && pcsk9Appropriate;
+    let order;
+    if (pt.statinIntolerance) {
+      // Physician-lead policy: statin-intolerant → a non-ezetimibe drug first, chosen by the gap to goal
+      // (bempedoic acid if the reduction needed is within its expected effect, otherwise PCSK9 mAb); then ezetimibe.
+      const gap = 1 - g / ldl;
+      order = gap <= NONSTATINS.bempedoic.planningReduction
+        ? ['bempedoic', 'ezetimibe', 'pcsk9mab']
+        : ['pcsk9mab', 'ezetimibe', 'bempedoic'];
+    } else {
+      // Physician-lead policy: ezetimibe always before PCSK9 mAb, whatever the gap.
+      order = ['ezetimibe', 'pcsk9mab'];
+    }
+    const sequence = order.filter((k) => (k === 'ezetimibe' ? !ther.ezetimibe
+      : k === 'bempedoic' ? !ther.bempedoic
+      : canPcsk9));
 
-    const prefix = pendingStep ? 'If LDL-C remains above goal at recheck, add' : 'Add';
+    // Physician-lead policy: ezetimibe always first; statin-intolerant → ezetimibe, bempedoic acid, then PCSK9 mAb.
+    let prev = null;
     for (const key of sequence) {
+      const prefix = prev
+        ? `If LDL-C remains above goal on ${NONSTATINS[prev].name.toLowerCase()}, add`
+        : (pendingStep ? 'If LDL-C remains above goal at recheck, add' : 'Add');
+      prev = key;
       if (est != null && est <= g) break;
       const d = NONSTATINS[key];
       const from = est;
@@ -426,4 +446,12 @@ function apobGoalFor(pt, out) {
     if ((isHtg(pt) || pt.diabetes) && a.byLdlGoal[g]) return a.byLdlGoal[g];
   }
   return null;
+}
+
+// CAC ≥100 AU (or ≥75th percentile) sets an LDL-C goal of <70 or lower; no PREVENT tier can be stricter.
+export function cacSettlesGoal(pt) {
+  const c = GUIDELINE.cac.elevated;
+  const score = pt.cac?.score;
+  const pctl = pt.cac?.percentile;
+  return (Number.isFinite(score) && score >= c.min) || (Number.isFinite(pctl) && pctl >= c.percentile && score > 0);
 }

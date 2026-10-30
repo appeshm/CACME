@@ -1,6 +1,7 @@
 import { recommend } from '../src/engine/recommend.js';
 import { GUIDELINE } from '../src/engine/guideline-config.js';
 import { EVIDENCE } from '../src/engine/evidence.js';
+import { visibleSections } from '../src/engine/workflow.js';
 
 const $ = (id) => document.getElementById(id);
 const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'triglycerides', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
@@ -9,12 +10,33 @@ const THER = ['ezetimibe', 'pcsk9', 'inclisiran', 'bempedoic'];
 
 export const EXAMPLE = {
   sex: 'female', age: 58, totalCholesterol: 228, hdl: 52, ldl: 148, sbp: 138, bmi: 29.4, egfr: 82,
-  diabetes: false, smoker: false, onBpMeds: true, cac: 112, enhancers: ['familyHistoryPrematureAscvd'],
+  diabetes: false, smoker: false, onBpMeds: true, cac: 45, enhancers: ['familyHistoryPrematureAscvd'],
 };
 
 const enhBox = $('enhancers');
 enhBox.innerHTML = GUIDELINE.riskEnhancers.map((e) =>
-  `<label class="chk"><input type="checkbox" id="enh-${e.id}" data-enh="${e.id}"> ${e.label}</label>`).join('');
+  `<label class="chk" data-enh-wrap="${e.id}"><input type="checkbox" id="enh-${e.id}" data-enh="${e.id}"> ${e.label}</label>`).join('');
+
+// Hidden questions are ignored, so stale answers in a skipped section cannot change the result.
+const isShown = (el) => !el.closest('[hidden]');
+
+const PATHWAY_TEXT = {
+  secondary: 'Pathway: secondary prevention. PREVENT and CAC are not needed.',
+  severe: 'Pathway: LDL-C \u2265190 / FH. PREVENT is not used.',
+  primary: 'Pathway: primary prevention. CAC first, then PREVENT if still needed.',
+};
+
+function applyVisibility(v) {
+  document.querySelectorAll('[data-section]').forEach((el) => {
+    const key = el.dataset.section;
+    if (key === 'enhancers') { el.hidden = v.enhancers.length === 0; return; }
+    el.hidden = !v[key];
+  });
+  enhBox.querySelectorAll('[data-enh-wrap]').forEach((el) => { el.hidden = !v.enhancers.includes(el.dataset.enhWrap); });
+  $('pathwayNote').textContent = PATHWAY_TEXT[v.pathway];
+  $('skippedNote').hidden = !v.skipped.length;
+  $('skippedNote').textContent = v.skipped.length ? `Not asked: ${v.skipped.join('; ')}.` : '';
+}
 
 function fill(d, provenance = {}) {
   $('sex').value = d.sex || 'female';
@@ -31,15 +53,15 @@ function fill(d, provenance = {}) {
 }
 
 function read() {
-  const n = (id) => { const v = $(id).value.trim(); return v === '' ? undefined : Number(v); };
+  const n = (id) => { const el = $(id); const v = el.value.trim(); return v === '' || !isShown(el) ? undefined : Number(v); };
   const pt = { sex: $('sex').value };
   NUM.forEach((k) => { pt[k] = n(k); });
-  BOOL.forEach((k) => { pt[k] = $(k).checked; });
+  BOOL.forEach((k) => { pt[k] = $(k).checked && isShown($(k)); });
   const cac = n('cac');
   if (cac !== undefined) pt.cac = { score: cac, percentile: n('cacPercentile') };
   pt.currentTherapy = { statinDrug: $('statinDrug').value || null, statinDose: n('statinDose') ?? null };
   THER.forEach((k) => { pt.currentTherapy[k] = $(k).checked; });
-  pt.enhancers = [...enhBox.querySelectorAll('[data-enh]:checked')].map((el) => el.dataset.enh);
+  pt.enhancers = [...enhBox.querySelectorAll('[data-enh]:checked')].filter(isShown).map((el) => el.dataset.enh);
   return pt;
 }
 
@@ -63,9 +85,11 @@ function renderClin(r) {
       <div class="risknums">
         <div><span class="v main">${pct(r.risk.ascvd)}</span><span class="k">ASCVD</span></div>
         <div><span class="v">${pct(r.risk.totalCvd)}</span><span class="k">Total CVD</span></div>
-        <div><span class="v">${pct(r.risk.heartFailure)}</span><span class="k">Heart failure</span></div>
+        <div><span class="v">${r.risk.heartFailure == null ? '\u2014' : pct(r.risk.heartFailure)}</span><span class="k">Heart failure${r.risk.heartFailure == null ? ' (add BMI)' : ''}</span></div>
       </div>${scale(r.risk.ascvd)}
       <p style="margin:8px 0 0">Risk tier: <span class="pill ${r.tier}">${TIER_LABEL[r.tier]}</span></p></div>`);
+  } else if (r.pathway === 'primary' && r.preventSkipped) {
+    parts.push(`<div class="card"><h2>Risk</h2><p style="margin:0">PREVENT not needed: CAC ${r.cac.score} AU sets the LDL-C goal.</p></div>`);
   } else if (r.pathway === 'primary') {
     parts.push(`<div class="card"><h2>10-year risk &middot; PREVENT</h2><p style="margin:0 0 6px">Not calculated:</p><ul class="errors">${r.riskErrors.map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>`);
   } else {
@@ -119,7 +143,11 @@ function renderPatient(r) {
 }
 
 function run() {
-  const r = recommend(read());
+  // Two passes: show the right questions for the answers so far, then show tier-dependent ones.
+  applyVisibility(visibleSections(read()));
+  let r = recommend(read());
+  applyVisibility(visibleSections(read(), r));
+  r = recommend(read());
   renderClin(r);
   renderPatient(r);
   return r;

@@ -90,7 +90,7 @@ export const EVIDENCE = Object.freeze({
     cite: 'Project physician lead (preventive cardiologist) decision, 2026-10-30, where the 2026 guideline text available to the build was ambiguous.',
     doi: null,
     status: 'clinician-confirmed',
-    note: 'CAC 0 rescan 5 y; CAC \u2265300 \u2192 high-intensity statin, LDL-C <70; CAC \u22651000 \u2192 <70 with <55 considered; all clinical ASCVD \u2192 LDL-C <55; LDL-C \u2265190/FH \u2192 LDL-C <70 and \u226550% reduction.',
+    note: 'CAC 0 rescan 5 y; CAC \u2265300 \u2192 high-intensity statin, LDL-C <70; CAC \u22651000 \u2192 <70 with <55 considered; later superseded by the 2026 summary table. Standing policies: ezetimibe is always the first add-on before a PCSK9 mAb, regardless of the gap to goal; statin-intolerant patients get a non-ezetimibe drug first (bempedoic acid if the reduction needed is \u226421%, otherwise a PCSK9 mAb), then ezetimibe; CAC is requested for every primary-prevention patient (not FH) and used to set the LDL-C goal.',
   },
   FDA_LABELS: {
     cite: 'US FDA prescribing information (rosuvastatin, atorvastatin, simvastatin, ezetimibe, bempedoic acid, evolocumab, alirocumab, inclisiran).',
