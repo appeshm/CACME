@@ -160,3 +160,29 @@ test('patient at goal on statin is told to continue', () => {
   assert.ok(r.plan.some((s) => s.text.includes('at goal')));
   assert.ok(!r.plan.some((s) => s.kind === 'nonstatin'));
 });
+
+test('CAC = 0 rescan text gives 5 years within the 3-7 year range', () => {
+  const r = recommend({ ...pp, cac: { score: 0 } });
+  assert.ok(r.cac.text.includes('3–7'));
+});
+
+test('CAC = 0 does not de-risk diabetes over age 40', () => {
+  const r = recommend({ ...pp, diabetes: true, cac: { score: 0 } });
+  assert.notEqual(r.statin.intensity, 'defer');
+});
+
+test('CKD stage 3+ without ASCVD, age 40-75: at least moderate statin', () => {
+  const r = recommend({ ...pp, age: 50, sbp: 112, onBpMeds: false, egfr: 45, ldl: 110, totalCholesterol: 180, hdl: 55 });
+  assert.ok(['moderate', 'high'].includes(r.statin.intensity));
+  assert.ok(r.statin.reasons.some((x) => x.reason.includes('CKD stage 3+')));
+});
+
+test('untreated LDL-C <70 without risk factors flags no benefit', () => {
+  const r = recommend({ ...pp, onBpMeds: false, totalCholesterol: 140, hdl: 60, ldl: 65 });
+  assert.ok(r.flags.some((f) => f.text.includes('No Benefit')));
+});
+
+test('HeFH warns not to use PREVENT', () => {
+  const r = recommend({ ...pp, fh: true });
+  assert.ok(r.flags.some((f) => f.text.includes('should not be used')));
+});

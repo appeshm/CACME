@@ -14,11 +14,11 @@ export const EVIDENCE = Object.freeze({
     note: 'Base-model 10-year coefficients (Suppl. Table S12A) cross-checked against an independent implementation.',
   },
   DYSLIPIDEMIA_2026: {
-    cite: '2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia. Circulation / J Am Coll Cardiol. 2026.',
+    cite: 'Blumenthal RS, Morris PB, et al. 2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia. Circulation. 2026;153.',
     doi: '10.1161/CIR.0000000000001423',
     altDoi: '10.1016/j.jacc.2025.11.016',
-    status: 'secondary-source',
-    note: 'Risk tiers (<3, 3–<5, 5–<10, ≥10% PREVENT-ASCVD) and LDL-C goals (<100, <70, <55) confirmed via ACC, AHA, JACC Guideline-at-a-Glance and Medscape summaries. Full text not yet reviewed line-by-line.',
+    status: 'verified',
+    note: 'Cross-checked against the full guideline text (Blumenthal RS, Morris PB, et al. Circulation. 2026;153) on 2026-10-30: PREVENT scope and tiers (4.2.3.2), primary prevention (4.2.3.7), CAC (4.2.3.6, 4.2.7), severe hypercholesterolemia (4.2.4), diabetes (4.2.5), secondary prevention (4.2.6), CKD (4.2.8.8), statin intensity (Table 6), risk enhancers (Table 13). Figure 1 (goals chart) is an image and could not be machine-read.',
   },
   CHOLESTEROL_2018: {
     cite: 'Grundy SM, Stone NJ, Bailey AL, et al. 2018 AHA/ACC/.../PCNA Guideline on the Management of Blood Cholesterol. Circulation. 2019;139:e1082–e1143.',

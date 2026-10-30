@@ -1,6 +1,6 @@
 /**
  * Lipid-lowering therapy reference data.
- * Statin intensity groups: 2018 AHA/ACC Cholesterol Guideline, Table 3 (CHOLESTEROL_2018).
+ * Statin intensity groups: 2026 dyslipidemia guideline Table 6 (same as 2018 Table 3; pitavastatin 1, 2, 4 mg).
  * Doses / renal limits: FDA prescribing information (FDA_LABELS).
  *
  * LDL-C effect numbers used for projections are the LOWER bound of each guideline
@@ -29,7 +29,7 @@ export const STATIN_INTENSITY = Object.freeze({
       { drug: 'Pravastatin', doses: [40, 80], preferredStart: 40 },
       { drug: 'Lovastatin', doses: [40, 80], preferredStart: 40 },
       { drug: 'Fluvastatin XL', doses: [80], preferredStart: 80 },
-      { drug: 'Pitavastatin', doses: [1, 2, 3, 4], preferredStart: 2 },
+      { drug: 'Pitavastatin', doses: [1, 2, 4], preferredStart: 2 },
     ],
   },
   low: {
@@ -83,7 +83,7 @@ export const NONSTATINS = Object.freeze({
     name: 'Inclisiran',
     dose: '284 mg SC at day 0, month 3, then every 6 months',
     planningReduction: 0.50,
-    effectNote: '~50% LDL-C reduction vs placebo (ORION-10/11). Clinician to confirm current outcome-trial status.',
+    effectNote: '~50% LDL-C reduction vs placebo (ORION-10/11). Outcome trials pending; the 2026 guideline treats it as a second-line PCSK9 inhibitor.',
     evidence: ['ORION_10_11', 'ECDP_2022'],
   },
 });

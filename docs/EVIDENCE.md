@@ -1,5 +1,7 @@
 # Evidence log
 
+**2026-10-30: all guideline rules were cross-checked against the full 2026 guideline text** (Blumenthal RS, Morris PB, et al. Circulation. 2026;153; DOI 10.1161/CIR.0000000000001423), provided by the physician lead. See "Crosscheck against full guideline" at the end.
+
 Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID has a verification status:
 
 - **verified**: checked against the primary source or an independent implementation.
@@ -64,3 +66,32 @@ Statin projections use the **low end** of each intensity range (moderate 30%, hi
 - MESA CAC percentile and the MESA risk score.
 - Per-dose LDL-C effects within an intensity group (for example, the "rule of 6").
 - Drug–drug interaction checking. The EHR's own interaction checking should be used.
+
+
+## Crosscheck against full guideline (2026-10-30)
+| Parameter | Guideline (section, COR/LOE) | App before | Result |
+|---|---|---|---|
+| PREVENT scope and tiers | 4.2.3.2: age 30–79, no ASCVD, LDL-C 70–189; <3 / 3–<5 / 5–<10 / ≥10% (COR 1) | same | ✅ match; added note when LDL-C <70 |
+| Borderline / intermediate | moderate statin (2a / 1A), goal <100 (2a) | same | ✅ |
+| High ≥10% | high-intensity ≥50% (1A), <70 (2a), ezetimibe (2a), PCSK9 mAb or bempedoic acid (2b) | same | ✅ PCSK9 step now cites COR 2b |
+| Low risk 30–59, LDL-C 160–189 or 30-y ≥10% | moderate statin reasonable (2a) | same, goal <100 from summary table | ✅ goal <100 kept from summary table |
+| Untreated LDL-C <70 & non-HDL-C <100, no risk factors | LLT unlikely to help (3: No Benefit) | missing | ➕ added |
+| CAC = 0 | defer, repeat CAC in **3–7 y** (2a); not with FH/LDL >190, diabetes age >40, smoking, strong family history | 5 y; diabetes any age | ✏️ 5 y kept (within range), range shown; diabetes exclusion now age >40 |
+| CAC 1–99 & <75th %ile | moderate, <100 (2a) | same | ✅ |
+| CAC 100–299 or ≥75th %ile | ≥50% reduction, <70 (COR 1) | same | ✅ added ≥50% note |
+| CAC 300–999 | <70 (COR 1); <55 reasonable (2a) | same | ✅ |
+| CAC ≥1000 | <55 (COR 1) | same | ✅ |
+| LDL-C ≥190 | <100 (1); <70 with HeFH, risk factors or coronary calcium (1); <55 with ASCVD (1); inclisiran if ≥100 (2a) | same | ✅ added inclisiran note |
+| HeFH | PREVENT should not be used (3: Harm); CAC 0 does not de-risk | PREVENT skipped | ✅ added explicit warning |
+| Diabetes 40–75 | moderate, <100 (1A); multiple risk factors → high, <70 (2a) | checkbox "risk factors or modifiers" | ✏️ checkbox reworded to "multiple ASCVD risk factors or diabetes-specific enhancers (Table 17)" |
+| ASCVD not very high risk | high-intensity, <70 (1A); <55 reasonable (2a) | same | ✅ |
+| ASCVD very high risk | <55 (1A); ezetimibe and/or PCSK9 mAb (1A); inclisiran only if mAb not possible (2a) | same | ✅ definition text updated to 2026 Figure 10 |
+| CKD 3+ with ASCVD | <55, ≥50% (COR 1, 4.2.8.8) | same | ✅ |
+| CKD 3+ without ASCVD, 40–75, LDL-C 70–189 | moderate statin ± ezetimibe (COR 1) | missing | ➕ added |
+| Statin intensity | Table 6 | 2018 Table 3 | ✏️ pitavastatin 1, 2, 4 mg (3 mg removed) |
+| Risk enhancers | Table 13 | 2018 list | ✏️ replaced with 2026 list (adds Filipino ancestry, polygenic risk, CKM, reproductive markers; apoB ≥120; TG ≥175 nonfasting / ≥150 fasting; ABI removed) |
+| Ezetimibe effect | "lowered LDL-C by 24%" | 24% | ✅ |
+| Follow-up | lipids 4–12 wk after change, then every 6–12 mo | 4–12 wk | ✏️ added 6–12 mo |
+| Lp(a) | at least once in all adults (COR 1) | same | ✅ |
+| ApoB goals | Figure 1 (image, not machine-readable); text confirms apoB <55 in highest-risk groups | <90 / <70 / <55 from summary table | ⚠️ kept from summary table; verify against Figure 1 |
+| LDL-C calculation | Martin/Hopkins or Sampson/NIH preferred (COR 1) | uses entered value | ⚠️ open question 15 |

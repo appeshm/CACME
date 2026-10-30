@@ -99,6 +99,8 @@ export function recommend(pt) {
     const rule = why.length ? sh.ldlGoalEnhanced : sh.ldlGoal;
     goal(rule.value, why.length ? `LDL-C \u2265190 / FH with ${why.join('; ')}` : 'LDL-C \u2265190 without HeFH, risk factors or subclinical atherosclerosis', rule.evidence, rule.status);
     flag('info', `Goal: LDL-C <${rule.value} mg/dL AND \u2265${Math.round(sh.ldlGoal.minReduction * 100)}% reduction from untreated baseline.`, rule.evidence);
+    if (pt.fh) flag('warning', 'HeFH: general-population risk tools (PREVENT) should not be used, and CAC = 0 does not justify deferring statin.', ['DYSLIPIDEMIA_2026']);
+    flag('info', 'If LDL-C stays ≥100 mg/dL despite maximally tolerated statin ± ezetimibe, inclisiran is reasonable (COR 2a; outcome trials pending).', ['DYSLIPIDEMIA_2026']);
     if (rf.length) flag('review', `"Additional ASCVD risk factors" was taken to mean: ${rf.join(', ')}. Confirm this applies.`, ['GUIDELINE_2026_SUMMARY']);
     flag('info', 'Consider evaluation for familial hypercholesterolemia and cascade screening of relatives.', ['CHOLESTEROL_2018']);
   } else {
@@ -145,6 +147,24 @@ export function recommend(pt) {
       raise(lr.statin, `Low 10-year risk but untreated LDL-C ${baseLdl} mg/dL (160\u2013189), age 30\u201359.`, lr.evidence);
       goal(lr.ldlGoal, 'Untreated LDL-C 160\u2013189, age 30\u201359', lr.evidence, 'clinician-confirmed');
     }
+    // CKD stage 3+ (no ASCVD), age 40–75, LDL-C 70–189
+    const ck = GUIDELINE.ckd;
+    if (Number.isFinite(pt.egfr) && pt.egfr < ck.egfrBelow && pt.age >= ck.ageMin && pt.age <= ck.ageMax && Number.isFinite(pt.ldl) && pt.ldl >= ck.ldlMin && pt.ldl <= ck.ldlMax) {
+      raise(ck.statin, `CKD stage 3+ (eGFR ${pt.egfr}), age 40–75: moderate-intensity statin, or moderate-intensity statin + ezetimibe.`, ck.evidence);
+    }
+
+    // No-benefit zone: untreated LDL-C <70 and non-HDL-C <100 without additional risk factors
+    const nb = GUIDELINE.noBenefit;
+    const uLdl = onStatin ? pt.untreatedLdl : pt.ldl;
+    const uNonHdl = onStatin ? (pt.untreatedTotalCholesterol - pt.untreatedHdl) : (pt.totalCholesterol - pt.hdl);
+    const anyRf = pt.diabetes || pt.smoker || pt.onBpMeds || (pt.enhancers || []).length > 0;
+    if (Number.isFinite(uLdl) && uLdl < nb.ldlBelow && Number.isFinite(uNonHdl) && uNonHdl < nb.nonHdlBelow && !anyRf && !(pt.cac?.score > 0)) {
+      flag('warning', 'Untreated LDL-C <70 and non-HDL-C <100 mg/dL with no additional risk factors: starting lipid-lowering therapy is unlikely to reduce ASCVD risk (COR 3: No Benefit).', nb.evidence);
+    }
+    if (Number.isFinite(uLdl) && uLdl < 70) {
+      flag('info', 'PREVENT-based treatment thresholds were set for LDL-C 70–189 mg/dL.', ['DYSLIPIDEMIA_2026']);
+    }
+
     if (out.tier === 'low' && pt.age <= 59) {
       flag('info', 'The 2026 guideline also uses 30-year ASCVD risk \u226510% in adults 30\u201359. 30-year PREVENT is not yet built into this app.', ['GUIDELINE_2026_SUMMARY']);
     }
@@ -169,7 +189,7 @@ export function recommend(pt) {
     flag('info', `Risk enhancers present: ${enh.map((e) => e.label).join('; ')}. These favor initiating or intensifying statin in borderline/intermediate risk.`, ['CHOLESTEROL_2018']);
   }
   if (!pt.lpaMeasured) {
-    flag('info', 'Lp(a) has not been recorded. The 2026 guideline recommends measuring Lp(a) in all adults as part of risk assessment.', ['DYSLIPIDEMIA_2026']);
+    flag('info', 'Lp(a) has not been recorded. The 2026 guideline recommends measuring Lp(a) at least once in all adults (COR 1).', ['DYSLIPIDEMIA_2026']);
   }
 
   // ---- 5. Choose goal (strictest applicable) ----------------------------
@@ -213,7 +233,9 @@ function interpretCac(pt, out, { raise, goal, flag }) {
   if (res.score === 0) {
     res.category = 'zero';
     const z = cfg.zero;
-    const present = z.exclusions.filter((k) => pt[k] || (pt.enhancers || []).includes(k));
+    const present = z.exclusions.filter((k) => (k === 'diabetesOver40'
+      ? pt.diabetes && pt.age > 40
+      : pt[k] || (pt.enhancers || []).includes(k)));
     if (out.tier === 'borderline' || out.tier === 'intermediate') {
       if (present.length) {
         res.text = `CAC = 0 does NOT downgrade risk here because of: ${present.join(', ')}.`;
@@ -222,7 +244,7 @@ function interpretCac(pt, out, { raise, goal, flag }) {
         out.statin.intensity = 'defer';
         out.statin.reasons.push({ intensity: 'defer', reason: 'CAC = 0 in borderline/intermediate risk: reasonable to defer statin and reassess.', evidence: z.evidence });
         out.goalCandidates.length = 0; // no statin-driven goal while deferring
-        const interval = z.repeatYears ? `${z.repeatYears} years` : 'an interval chosen by the clinician (2018 guideline: 5–10 years; 2026 summaries cite ~5 years — not yet verified)';
+        const interval = `${z.repeatYears} years (guideline range ${z.repeatRange.join('–')} years, shorter when baseline risk is higher)`;
         res.text = `CAC = 0: reasonable to defer statin; repeat risk assessment / CAC in ${interval}.`;
         flag('info', res.text, z.evidence);
       }
@@ -241,6 +263,7 @@ function interpretCac(pt, out, { raise, goal, flag }) {
     const basis = res.score >= e.min ? `CAC ${res.score}` : `CAC at the ${pctl}th percentile`;
     raise(e.statin, `${basis}: high-intensity statin.`, e.evidence);
     goal(e.ldlGoal, `${basis} (\u2265${e.min} AU or \u2265${e.percentile}th percentile)`, e.evidence, e.status);
+    flag('info', 'CAC ≥100 AU or ≥75th percentile: target ≥50% LDL-C reduction as well as the goal (COR 1).', e.evidence);
     res.text = `${basis}: high-intensity statin, LDL-C goal <${e.ldlGoal} mg/dL.`;
   } else {
     const m = cfg.mild;
@@ -347,10 +370,10 @@ function buildPlan(pt, out, flag) {
         text: `${prefix} ${d.name} (${d.dose}). ${d.effectNote}`,
         projectedFrom: from != null ? Math.round(from) : null,
         projectedLdl: est != null ? Math.round(est) : null,
-        evidence: key === 'pcsk9mab' && highRiskPrimary ? [...d.evidence, 'VESALIUS_CV', 'PHYSICIAN_LEAD'] : d.evidence,
+        evidence: key === 'pcsk9mab' && highRiskPrimary ? [...d.evidence, 'DYSLIPIDEMIA_2026', 'VESALIUS_CV', 'PHYSICIAN_LEAD'] : d.evidence,
       });
       if (key === 'pcsk9mab' && highRiskPrimary) {
-        flag('info', 'PCSK9 mAb in primary prevention: VESALIUS-CV showed fewer first major events (3-point MACE HR 0.75). Many trial participants had coronary, peripheral or cerebrovascular atherosclerosis without prior MI or stroke, and all had LDL-C \u226590 mg/dL on therapy. Check payer criteria.', ['VESALIUS_CV']);
+        flag('info', 'PCSK9 mAb in high-risk primary prevention: the 2026 guideline rates adding a PCSK9 mAb or bempedoic acid as "may be reasonable" (COR 2b) after statin ± ezetimibe. VESALIUS-CV showed fewer first major events (3-point MACE HR 0.75). Many trial participants had coronary, peripheral or cerebrovascular atherosclerosis without prior MI or stroke, and all had LDL-C \u226590 mg/dL on therapy. Check payer criteria.', ['VESALIUS_CV']);
       }
     }
     if (out.pathway === 'primary' && !pt.statinIntolerance && !highRiskPrimary && (est == null || est > g)) {
@@ -360,7 +383,7 @@ function buildPlan(pt, out, flag) {
 
   steps.push({
     kind: 'followup',
-    text: `Recheck lipid panel (fasting or non-fasting) ${GUIDELINE.followUp.lipidRecheckWeeks.join('–')} weeks after starting or changing therapy to assess response and adherence.`,
+    text: `Recheck lipid panel (fasting or non-fasting) ${GUIDELINE.followUp.lipidRecheckWeeks.join('–')} weeks after starting or changing therapy, then every ${GUIDELINE.followUp.thereafterMonths.join('–')} months.`,
     evidence: GUIDELINE.followUp.evidence,
   });
   return steps;
