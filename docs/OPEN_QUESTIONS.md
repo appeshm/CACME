@@ -21,6 +21,6 @@ Answer them (with the guideline section or table number) and the config in
 | 11 | ~~PCSK9 in primary prevention~~ **Answered: suggest it** after statin + ezetimibe when the goal is <70 (high risk or CAC ≥300), citing VESALIUS-CV with a note on the trial population. | Applied. | `buildPlan` |
 | 12 | ~~Ezetimibe effect size~~ **Answered: keep 24%.** | Applied. | `therapies.js` |
 | 13 | **"Additional ASCVD risk factors" for LDL-C ≥190.** The app uses smoking, diabetes, BP treatment and family history of premature ASCVD, and shows a review note listing which applied. Is that the right set? | Review note. | `severeHypercholesterolemia.riskFactorKeys` |
-| 14 | **Hypertriglyceridemia rows** of the 2026 table (TG 150–499 with risk factors → <70; age <50 without enhancers → <100). Add a triglyceride field and these rules? | Not implemented. | — |
+| 14 | ~~Hypertriglyceridemia goals~~ **Added from Figure 1** with a triglyceride field. Still open: statin-initiation pathways in Figures 14–17 (images) — send screenshots to encode them. | Goals applied; initiation flagged. | `htg` |
 | 15 | **LDL-C calculation.** 2026 prefers Martin/Hopkins or Sampson/NIH over Friedewald. Should the app compute Sampson LDL-C from TC/HDL/TG? | Uses the LDL-C entered or from the chart. | — |
-| 16 | **ApoB goals.** Figure 1 of the guideline is an image. Please confirm the apoB goals (<90 / <70 / <55) against it. | From summary table. | `apobGoals` |
+| 16 | ~~ApoB goals~~ **Verified from Figure 1 screenshot**; now conditional as the figure shows. | Applied. | `apob` |

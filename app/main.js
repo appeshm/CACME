@@ -3,7 +3,7 @@ import { GUIDELINE } from '../src/engine/guideline-config.js';
 import { EVIDENCE } from '../src/engine/evidence.js';
 
 const $ = (id) => document.getElementById(id);
-const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
+const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'triglycerides', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
 const BOOL = ['diabetes', 'diabetesModifiers', 'smoker', 'onBpMeds', 'clinicalAscvd', 'veryHighRisk', 'fh', 'statinIntolerance', 'lpaMeasured'];
 const THER = ['ezetimibe', 'pcsk9', 'inclisiran', 'bempedoic'];
 
@@ -76,7 +76,7 @@ function renderClin(r) {
   const g = r.ldlGoal;
   const cacTxt = r.cac?.score != null ? `<span class="sub">CAC ${r.cac.score}</span>` : '';
   parts.push(`<div class="card"><h2>LDL-C goal</h2>${g
-    ? `<div class="goal"><span class="big">&lt;${g.value} mg/dL</span><span class="sub">non-HDL-C &lt;${g.nonHdlValue} mg/dL</span>${g.apobValue ? `<span class="sub">ApoB &lt;${g.apobValue} (optional)</span>` : ''}${
+    ? `<div class="goal"><span class="big">&lt;${g.value} mg/dL</span><span class="sub">non-HDL-C &lt;${g.nonHdlValue} mg/dL</span>${g.apobValue ? `<span class="sub">ApoB &lt;${g.apobValue} mg/dL</span>` : ''}${
         r.requiredReduction != null ? `<span class="sub">needs ${Math.round(r.requiredReduction * 100)}% reduction from current</span>` : ''}${cacTxt}</div>
        <p class="refs" style="margin:6px 0 0">Basis: ${esc(g.reason)} &middot; ${esc(g.evidence.join(', '))}</p>`
     : `<p style="margin:0">${r.statin.intensity === 'defer' ? 'No goal while statin is deferred (CAC = 0).' : 'No automatic goal. Clinician to set goal (see review items).'}</p>`}</div>`);

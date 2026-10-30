@@ -81,7 +81,7 @@ export function recommend(pt) {
     } else {
       const rule = sp.ldlGoalAscvd;
       goal(rule.value, 'Clinical ASCVD (not very high risk)', rule.evidence, rule.status);
-      flag('info', `Optional intensive goal: LDL-C <${rule.optionalGoal} mg/dL by shared decision-making.`, rule.evidence);
+      flag('info', `Optional intensive goal: LDL-C <${rule.optionalGoal} mg/dL, non-HDL-C <85 and apoB <55 mg/dL by shared decision-making (COR 2a).`, rule.evidence);
     }
     if ((pt.enhancers || []).includes('lpa')) {
       flag('info', 'Elevated Lp(a) with clinical ASCVD: if LDL-C is not at goal, adding a PCSK9 mAb is favored.', ['GUIDELINE_2026_SUMMARY']);
@@ -165,6 +165,18 @@ export function recommend(pt) {
       flag('info', 'PREVENT-based treatment thresholds were set for LDL-C 70–189 mg/dL.', ['DYSLIPIDEMIA_2026']);
     }
 
+    // Hypertriglyceridemia (Figure 1)
+    const h = GUIDELINE.htg;
+    if (isHtg(pt)) {
+      const rfs = htgRiskFactors(pt);
+      if (pt.age >= h.withRiskFactor.ageMin && pt.age <= h.withRiskFactor.ageMax && rfs.length) {
+        goal(h.withRiskFactor.ldlGoal, `Triglycerides ${pt.triglycerides} mg/dL, age 40–75 with ASCVD risk factor (${rfs.join(', ')})`, h.evidence, 'verified');
+      } else if (pt.age < h.young.ageBelow && !(pt.enhancers || []).length) {
+        goal(h.young.ldlGoal, `Triglycerides ${pt.triglycerides} mg/dL, age <50, no risk enhancers`, h.evidence, 'verified');
+      }
+      flag('review', 'Hypertriglyceridemia: when to start a statin is shown in guideline Figures 14–17, which this app has not encoded. Confirm secondary causes are addressed and 4–12 weeks of lifestyle change have been tried.', ['DYSLIPIDEMIA_2026']);
+    }
+
     if (out.tier === 'low' && pt.age <= 59) {
       flag('info', 'The 2026 guideline also uses 30-year ASCVD risk \u226510% in adults 30\u201359. 30-year PREVENT is not yet built into this app.', ['GUIDELINE_2026_SUMMARY']);
     }
@@ -181,6 +193,10 @@ export function recommend(pt) {
     const msg = `LDL-C is ${Math.round(achieved * 100)}% lower than the pre-treatment value (${pt.untreatedLdl} \u2192 ${pt.ldl} mg/dL).`;
     if (needs50 && achieved < 0.5) flag('warning', `${msg} The \u226550% reduction target has not been met.`, ['DYSLIPIDEMIA_2026', 'CHOLESTEROL_2018']);
     else flag('info', msg, ['CHOLESTEROL_2018']);
+  }
+
+  if (Number.isFinite(pt.triglycerides) && pt.triglycerides >= 150) {
+    flag('info', 'Triglycerides ≥150 mg/dL: non-HDL-C or apoB is preferred over LDL-C to guide decisions (COR 2a).', ['DYSLIPIDEMIA_2026']);
   }
 
   // ---- 4. Risk enhancers (informational) --------------------------------
@@ -202,11 +218,9 @@ export function recommend(pt) {
       reason: basis.map((c) => c.reason).join('; '),
       evidence: [...new Set(basis.flatMap((c) => c.evidence))],
       status: basis.some((c) => c.status === 'needs-review') ? 'needs-review' : basis[0].status,
-      apobValue: GUIDELINE.apobGoals[value] ?? null,
     };
-    if (out.ldlGoal.apobValue) {
-      flag('info', `Optional ApoB goal <${out.ldlGoal.apobValue} mg/dL, mainly once LDL-C/non-HDL-C goals are met in diabetes, CKM syndrome or triglycerides 150\u2013499 mg/dL.`, ['GUIDELINE_2026_SUMMARY']);
-    }
+    out.ldlGoal.apobValue = apobGoalFor(pt, out);
+    if (out.ldlGoal.apobValue) addEv(GUIDELINE.apob.evidence);
     addEv(['DYSLIPIDEMIA_2026']);
   }
 
@@ -281,7 +295,7 @@ function interpretCac(pt, out, { raise, goal, flag }) {
     res.text = `CAC ${res.score}: extensive coronary calcium; LDL-C goal <${v.ldlGoal} mg/dL.`;
   } else if (res.score >= cfg.severe.min) {
     res.category = 'severe';
-    flag('info', `Severe CAC (300\u2013999): optional intensive goal LDL-C <${cfg.severe.optionalGoal} mg/dL to further lower risk.`, cfg.severe.evidence);
+    flag('info', `Severe CAC (300\u2013999): optional intensive goal LDL-C <${cfg.severe.optionalGoal} mg/dL, non-HDL-C <85 and apoB <55 mg/dL (COR 2a).`, cfg.severe.evidence);
   }
   return res;
 }
@@ -387,4 +401,29 @@ function buildPlan(pt, out, flag) {
     evidence: GUIDELINE.followUp.evidence,
   });
   return steps;
+}
+
+function isHtg(pt) {
+  const h = GUIDELINE.htg;
+  return Number.isFinite(pt.triglycerides) && pt.triglycerides >= h.tgMin && pt.triglycerides <= h.tgMax;
+}
+
+// "ASCVD risk factor" for the hypertriglyceridemia row: same traditional set used for LDL-C ≥190.
+function htgRiskFactors(pt) {
+  return GUIDELINE.severeHypercholesterolemia.riskFactorKeys.filter((k) => pt[k] || (pt.enhancers || []).includes(k));
+}
+
+// ApoB goal only in the situations Figure 1 lists.
+function apobGoalFor(pt, out) {
+  const a = GUIDELINE.apob;
+  const g = out.ldlGoal?.value;
+  if (out.pathway === 'secondary') {
+    if (out.veryHighRisk) return a.veryHighAscvd;
+    return isHtg(pt) ? a.ascvdHtg : null;
+  }
+  if (out.pathway === 'primary') {
+    if (isHtg(pt) && GUIDELINE.htg && pt.age >= 40 && pt.age <= 75 && htgRiskFactors(pt).length && g <= 70) return GUIDELINE.htg.withRiskFactor.apob;
+    if ((isHtg(pt) || pt.diabetes) && a.byLdlGoal[g]) return a.byLdlGoal[g];
+  }
+  return null;
 }

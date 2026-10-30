@@ -74,6 +74,12 @@ export const EVIDENCE = Object.freeze({
     status: 'verified',
     note: 'Background for CAC-based risk refinement. MESA risk score itself is NOT implemented here.',
   },
+  GUIDELINE_2026_FIG1: {
+    cite: '2026 Dyslipidemia Guideline, Figure 1: Lipoprotein Goals for ASCVD Risk Reduction (Blumenthal et al., Circulation 2026).',
+    doi: '10.1161/CIR.0000000000001423',
+    status: 'verified',
+    note: 'Read from a screenshot supplied by the physician lead (the figure is an image in the PDF). Source of conditional apoB goals and the hypertriglyceridemia goal rows.',
+  },
   GUIDELINE_2026_SUMMARY: {
     cite: '2026 ACC/AHA Dyslipidemia Guidelines: Lipoprotein Goals & Clinical Risk Stratification \u2014 summary table maintained by the project physician lead (Google Doc, Aug 2026).',
     doi: null,

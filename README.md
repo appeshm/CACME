@@ -31,7 +31,7 @@ tools/        builds a single-file demo (dist/preview.html)
 
 ## Run it
 ```
-npm test                       # 37 unit tests
+npm test                       # 42 unit tests
 npm start                      # then open http://localhost:8080/app/
 node tools/build-preview.mjs   # single-file demo in dist/
 ```

@@ -93,5 +93,8 @@ Statin projections use the **low end** of each intensity range (moderate 30%, hi
 | Ezetimibe effect | "lowered LDL-C by 24%" | 24% | ✅ |
 | Follow-up | lipids 4–12 wk after change, then every 6–12 mo | 4–12 wk | ✏️ added 6–12 mo |
 | Lp(a) | at least once in all adults (COR 1) | same | ✅ |
-| ApoB goals | Figure 1 (image, not machine-readable); text confirms apoB <55 in highest-risk groups | <90 / <70 / <55 from summary table | ⚠️ kept from summary table; verify against Figure 1 |
+| ApoB goals | Figure 1 (verified from screenshot): apoB <90 / <70 only with TG 150–499 or diabetes; <55 for very-high-risk ASCVD; <70 for ASCVD + TG 150–499; <55 optional with CAC 300–999 or ASCVD not very high | shown for every goal | ✏️ now shown only where Figure 1 lists it |
+| Hypertriglyceridemia (TG 150–499) | Figure 1: age 40–75 + ≥1 risk factor → LDL-C <70, apoB <70; age <50 without enhancers → <100. Non-HDL-C/apoB preferred when TG ≥150 (2a). Statin initiation: Figures 14–17 | missing | ➕ goals added; initiation flagged for clinician (Figures 14–17 not encoded) |
 | LDL-C calculation | Martin/Hopkins or Sampson/NIH preferred (COR 1) | uses entered value | ⚠️ open question 15 |
+
+Figure 1 also confirms every LDL-C/non-HDL-C goal already in the app (primary, severe, diabetes, subclinical atherosclerosis, clinical ASCVD).

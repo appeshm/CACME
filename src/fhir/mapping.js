@@ -113,6 +113,7 @@ export function buildDraftFromFhir({ patient, observations = [], conditions = []
     ['totalCholesterol', LOINC.totalCholesterol, mgdl],
     ['hdl', LOINC.hdl, mgdl],
     ['ldl', LOINC.ldl, mgdl],
+    ['triglycerides', LOINC.triglycerides, mgdl],
     ['sbp', LOINC.sbp, ['mm[hg]', 'mmhg']],
     ['bmi', LOINC.bmi, ['kg/m2', 'kg/m^2']],
     ['egfr', LOINC.egfr, ['ml/min/1.73m2', 'ml/min/{1.73_m2}', 'ml/min/1.73m^2']],

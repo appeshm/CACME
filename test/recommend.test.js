@@ -186,3 +186,30 @@ test('HeFH warns not to use PREVENT', () => {
   const r = recommend({ ...pp, fh: true });
   assert.ok(r.flags.some((f) => f.text.includes('should not be used')));
 });
+
+test('apoB goal is not shown without TG/diabetes in primary prevention', () => {
+  const r = recommend({ ...pp, cac: { score: 45 } });
+  assert.equal(r.ldlGoal.apobValue, null);
+});
+
+test('apoB goal <90 with TG 150-499 at LDL-C goal <100', () => {
+  const r = recommend({ ...pp, onBpMeds: false, sbp: 125, age: 45, triglycerides: 220, cac: { score: 45 } });
+  assert.equal(r.ldlGoal.value, 100);
+  assert.equal(r.ldlGoal.apobValue, 90);
+});
+
+test('hTG age 40-75 with a risk factor: LDL-C <70 and apoB <70', () => {
+  const r = recommend({ ...pp, triglycerides: 250 });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.equal(r.ldlGoal.apobValue, 70);
+  assert.ok(r.flags.some((f) => f.text.includes('Figures 14–17')));
+});
+
+test('very-high-risk ASCVD gets apoB <55', () => {
+  assert.equal(recommend({ ...pp, clinicalAscvd: true, veryHighRisk: true }).ldlGoal.apobValue, 55);
+});
+
+test('diabetes gets apoB <90 at goal <100', () => {
+  const r = recommend({ ...pp, age: 50, diabetes: true, onBpMeds: false, sbp: 118 });
+  assert.equal(r.ldlGoal.apobValue, 90);
+});

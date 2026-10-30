@@ -79,8 +79,22 @@ export const GUIDELINE = Object.freeze({
   // Low 10-y risk (<3%), age 30–59, LDL-C 160–189 → moderate-intensity statin reasonable (2026 4.2.3.7 rec 3, COR 2a).
   lowRiskHighLdl: { ageMin: 30, ageMax: 59, ldlMin: 160, ldlMax: 189, statin: 'moderate', ldlGoal: 100, evidence: ['GUIDELINE_2026_SUMMARY'] },
 
-  // Optional ApoB goals by LDL-C goal (2026 summary).
-  apobGoals: { 100: 90, 70: 70, 55: 55 },
+  // ApoB goals: only where Figure 1 lists them (verified from the figure).
+  apob: {
+    byLdlGoal: { 100: 90, 70: 70 },     // primary prevention with TG 150–499, or diabetes
+    veryHighAscvd: 55,                   // clinical ASCVD at very high risk
+    ascvdHtg: 70,                        // ASCVD not at very high risk with TG 150–499
+    optionalIntensive: 55,               // with optional LDL-C <55 (CAC 300–999, ASCVD not very high)
+    evidence: ['GUIDELINE_2026_FIG1'],
+  },
+
+  // Hypertriglyceridemia rows of Figure 1 (persistent TG 150–499 mg/dL).
+  htg: {
+    tgMin: 150, tgMax: 499,
+    withRiskFactor: { ageMin: 40, ageMax: 75, ldlGoal: 70, apob: 70 },
+    young: { ageBelow: 50, ldlGoal: 100 },
+    evidence: ['GUIDELINE_2026_FIG1', 'DYSLIPIDEMIA_2026'],
+  },
 
   cac: {
     // CAC use: men >40, women >45 with borderline/intermediate risk (DYSLIPIDEMIA_2026, secondary-source)
