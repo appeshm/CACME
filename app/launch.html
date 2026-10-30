@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>CACME launch</title></head>
+<body>
+<p>Connecting to the EHR&hellip;</p>
+<script src="vendor/fhir-client-2.6.3.min.js"></script>
+<script type="module">
+  import { SMART_CONFIG } from './smart-config.js';
+  FHIR.oauth2.authorize({
+    clientId: SMART_CONFIG.clientId,
+    scope: SMART_CONFIG.scope,
+    redirectUri: 'index.html',
+  });
+</script>
+</body>
+</html>

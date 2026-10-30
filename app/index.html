@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CACME Prevention Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- BODY:START -->
+<div class="wrap">
+  <header class="top">
+    <h1>CAC<span>ME</span> Prevention Planner</h1>
+    <p>PREVENT risk &rarr; CAC refinement &rarr; LDL-C goal &rarr; therapy</p>
+  </header>
+  <div class="banner" id="banner"><strong>Example patient loaded.</strong> Decision support for clinicians, not a substitute for clinical judgment. Items marked <em>review</em> are not yet verified against the full 2026 guideline text and are never applied automatically.</div>
+  <div class="grid">
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Patient</legend>
+        <div class="row">
+          <label class="f">Sex (at birth)<select id="sex"><option value="female">Female</option><option value="male">Male</option></select><span class="prov" data-prov="sex"></span></label>
+          <label class="f">Age <span class="unit">years, 30&ndash;79</span><input id="age" type="number" inputmode="decimal"><span class="prov" data-prov="age"></span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Lipids</legend>
+        <div class="row">
+          <label class="f">Total cholesterol <span class="unit">mg/dL</span><input id="totalCholesterol" type="number" inputmode="decimal"><span class="prov" data-prov="totalCholesterol"></span></label>
+          <label class="f">HDL-C <span class="unit">mg/dL</span><input id="hdl" type="number" inputmode="decimal"><span class="prov" data-prov="hdl"></span></label>
+          <label class="f">LDL-C <span class="unit">mg/dL</span><input id="ldl" type="number" inputmode="decimal"><span class="prov" data-prov="ldl"></span></label>
+        </div>
+        <label class="chk"><input id="lpaMeasured" type="checkbox"> Lp(a) has been measured</label>
+      </fieldset>
+      <fieldset>
+        <legend>Blood pressure, body, kidney</legend>
+        <div class="row">
+          <label class="f">Systolic BP <span class="unit">mmHg</span><input id="sbp" type="number" inputmode="decimal"><span class="prov" data-prov="sbp"></span></label>
+          <label class="f">BMI <span class="unit">kg/m&sup2;</span><input id="bmi" type="number" inputmode="decimal" step="0.1"><span class="prov" data-prov="bmi"></span></label>
+          <label class="f">eGFR <span class="unit">mL/min/1.73m&sup2;</span><input id="egfr" type="number" inputmode="decimal"><span class="prov" data-prov="egfr"></span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>History</legend>
+        <div class="chks">
+          <label class="chk"><input id="diabetes" type="checkbox"> Diabetes</label>
+          <label class="chk"><input id="smoker" type="checkbox"> Current smoker</label>
+          <label class="chk"><input id="onBpMeds" type="checkbox"> On blood-pressure medication</label>
+          <label class="chk"><input id="clinicalAscvd" type="checkbox"> Clinical ASCVD (MI, stroke, PAD, revascularization)</label>
+          <label class="chk"><input id="veryHighRisk" type="checkbox"> Very high risk ASCVD (multiple events or high-risk conditions)</label>
+          <label class="chk"><input id="fh" type="checkbox"> Familial hypercholesterolemia</label>
+          <label class="chk"><input id="statinIntolerance" type="checkbox"> Statin intolerance</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Coronary artery calcium</legend>
+        <div class="row">
+          <label class="f">Agatston score <span class="unit">blank if not done</span><input id="cac" type="number" inputmode="numeric" min="0"></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Current lipid therapy</legend>
+        <div class="row">
+          <label class="f">Statin<select id="statinDrug"><option value="">None</option><option>Atorvastatin</option><option>Rosuvastatin</option><option>Simvastatin</option><option>Pravastatin</option><option>Lovastatin</option><option>Fluvastatin XL</option><option>Fluvastatin</option><option>Pitavastatin</option></select></label>
+          <label class="f">Dose <span class="unit">mg daily</span><input id="statinDose" type="number" inputmode="decimal"></label>
+        </div>
+        <div class="chks">
+          <label class="chk"><input id="ezetimibe" type="checkbox"> Ezetimibe</label>
+          <label class="chk"><input id="pcsk9" type="checkbox"> PCSK9 mAb</label>
+          <label class="chk"><input id="inclisiran" type="checkbox"> Inclisiran</label>
+          <label class="chk"><input id="bempedoic" type="checkbox"> Bempedoic acid</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Risk enhancers</legend>
+        <div class="chks" id="enhancers"></div>
+      </fieldset>
+      <div class="actions">
+        <button type="submit" class="primary">Update results</button>
+        <button type="button" id="clear">Clear form</button>
+        <button type="button" id="example">Load example</button>
+        <button type="button" id="ehr" hidden>Reload from chart</button>
+      </div>
+    </form>
+
+    <section class="results" aria-live="polite">
+      <div class="actions"><div class="seg" role="group" aria-label="View">
+        <button type="button" id="viewClin" aria-pressed="true">Clinician view</button>
+        <button type="button" id="viewPt" aria-pressed="false">Patient summary</button>
+      </div></div>
+      <div id="clin"></div>
+      <div id="pt" class="card patient" hidden></div>
+    </section>
+  </div>
+  <p class="foot">Risk model: AHA PREVENT base equations, 10-year (Khan et al., Circulation 2024). Treatment thresholds: 2026 ACC/AHA multisociety dyslipidemia guideline, with the 2018 AHA/ACC cholesterol guideline and the 2022 ACC nonstatin pathway where noted. Every recommendation lists its sources and how well they have been verified. Not FDA-cleared. Not for use without clinician review.</p>
+</div>
+<!-- BODY:END -->
+<script src="vendor/fhir-client-2.6.3.min.js"></script>
+<script type="module" src="main.js"></script>
+<script type="module" src="smart.js"></script>
+</body>
+</html>

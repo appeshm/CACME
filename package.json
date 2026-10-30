@@ -1,0 +1,12 @@
+{
+  "name": "cacme",
+  "version": "0.1.0",
+  "description": "Cardiovascular prevention decision support: PREVENT risk, CAC refinement, LDL-C goal-directed therapy. Designed for future Epic (SMART on FHIR) integration.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "python3 -m http.server 8080"
+  },
+  "license": "UNLICENSED"
+}
