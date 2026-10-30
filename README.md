@@ -29,6 +29,10 @@ docs/         evidence log, open questions, validation, Epic plan
 tools/        builds a single-file demo (dist/preview.html)
 ```
 
+## Live site
+GitHub Pages: https://appeshm.github.io/CACME/ (deployed automatically by `.github/workflows/pages.yml` after tests pass).
+Manual entry only on the public site; the Epic (SMART on FHIR) launch needs a registered client ID.
+
 ## Run it
 ```
 npm test                       # 42 unit tests
