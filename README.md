@@ -1,4 +1,6 @@
-# CACME: cardiovascular prevention planner
+# LDL Goal Navigator
+
+Cardiovascular prevention decision support (repository: CACME).
 
 Clinical decision support for primary care. It estimates cardiovascular risk with the AHA **PREVENT** equations, refines the decision with a **coronary artery calcium (CAC)** score, sets an **LDL-C goal**, and suggests **statin intensity, doses and add-on therapy**, with a literature citation on every recommendation. It is built to plug into **Epic** as a SMART on FHIR app.
 

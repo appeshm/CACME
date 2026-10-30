@@ -167,7 +167,7 @@ $('viewClin').addEventListener('click', () => setView(false));
 $('viewPt').addEventListener('click', () => setView(true));
 
 // Exposed for the SMART on FHIR launcher (smart.js) to pre-fill from the chart.
-window.CACME = {
+window.LDLGoalNavigator = {
   loadFromChart(draft, provenance, warnings) {
     fill(draft, provenance);
     $('banner').innerHTML = `<strong>Pre-filled from the chart.</strong> Confirm every field before relying on results. ${warnings.map(esc).join(' ')}`;

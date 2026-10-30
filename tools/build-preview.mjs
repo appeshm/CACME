@@ -17,7 +17,7 @@ const body = index.split('<!-- BODY:START -->')[1].split('<!-- BODY:END -->')[0]
   .replace('<button type="button" id="ehr" hidden>Reload from chart</button>', '');
 const fonts = index.match(/<link rel="stylesheet" href="https:\/\/fonts[^>]+>/)[0];
 
-const html = `<title>CACME Prevention Planner</title>
+const html = `<title>LDL Goal Navigator</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 ${fonts}
 <style>

@@ -27,9 +27,9 @@ async function loadChart() {
   const { draft, provenance, warnings } = buildDraftFromFhir({
     patient, observations: [...labs, ...vitals, ...social], conditions, medications,
   });
-  window.CACME?.loadFromChart(draft, provenance, warnings);
+  window.LDLGoalNavigator?.loadFromChart(draft, provenance, warnings);
   const btn = document.getElementById('ehr');
-  if (btn) { btn.hidden = false; btn.onclick = () => window.CACME.loadFromChart(draft, provenance, warnings); }
+  if (btn) { btn.hidden = false; btn.onclick = () => window.LDLGoalNavigator.loadFromChart(draft, provenance, warnings); }
 }
 
 loadChart().catch((e) => {
