@@ -4,7 +4,7 @@ import { EVIDENCE } from '../src/engine/evidence.js';
 
 const $ = (id) => document.getElementById(id);
 const NUM = ['age', 'totalCholesterol', 'hdl', 'ldl', 'sbp', 'bmi', 'egfr', 'untreatedTotalCholesterol', 'untreatedHdl', 'untreatedLdl'];
-const BOOL = ['diabetes', 'smoker', 'onBpMeds', 'clinicalAscvd', 'fh', 'statinIntolerance', 'lpaMeasured'];
+const BOOL = ['diabetes', 'diabetesModifiers', 'smoker', 'onBpMeds', 'clinicalAscvd', 'veryHighRisk', 'fh', 'statinIntolerance', 'lpaMeasured'];
 const THER = ['ezetimibe', 'pcsk9', 'inclisiran', 'bempedoic'];
 
 export const EXAMPLE = {
@@ -21,6 +21,7 @@ function fill(d, provenance = {}) {
   NUM.forEach((k) => { $(k).value = d[k] ?? ''; });
   BOOL.forEach((k) => { $(k).checked = Boolean(d[k]); });
   $('cac').value = d.cac ?? d.cacScore ?? '';
+  $('cacPercentile').value = d.cacPercentile ?? '';
   const t = d.currentTherapy || {};
   $('statinDrug').value = t.statinDrug || '';
   $('statinDose').value = t.statinDose ?? '';
@@ -35,7 +36,7 @@ function read() {
   NUM.forEach((k) => { pt[k] = n(k); });
   BOOL.forEach((k) => { pt[k] = $(k).checked; });
   const cac = n('cac');
-  if (cac !== undefined) pt.cac = { score: cac };
+  if (cac !== undefined) pt.cac = { score: cac, percentile: n('cacPercentile') };
   pt.currentTherapy = { statinDrug: $('statinDrug').value || null, statinDose: n('statinDose') ?? null };
   THER.forEach((k) => { pt.currentTherapy[k] = $(k).checked; });
   pt.enhancers = [...enhBox.querySelectorAll('[data-enh]:checked')].map((el) => el.dataset.enh);
@@ -75,7 +76,7 @@ function renderClin(r) {
   const g = r.ldlGoal;
   const cacTxt = r.cac?.score != null ? `<span class="sub">CAC ${r.cac.score}</span>` : '';
   parts.push(`<div class="card"><h2>LDL-C goal</h2>${g
-    ? `<div class="goal"><span class="big">&lt;${g.value} mg/dL</span><span class="sub">non-HDL-C &lt;${g.nonHdlValue} mg/dL</span>${
+    ? `<div class="goal"><span class="big">&lt;${g.value} mg/dL</span><span class="sub">non-HDL-C &lt;${g.nonHdlValue} mg/dL</span>${g.apobValue ? `<span class="sub">ApoB &lt;${g.apobValue} (optional)</span>` : ''}${
         r.requiredReduction != null ? `<span class="sub">needs ${Math.round(r.requiredReduction * 100)}% reduction from current</span>` : ''}${cacTxt}</div>
        <p class="refs" style="margin:6px 0 0">Basis: ${esc(g.reason)} &middot; ${esc(g.evidence.join(', '))}</p>`
     : `<p style="margin:0">${r.statin.intensity === 'defer' ? 'No goal while statin is deferred (CAC = 0).' : 'No automatic goal. Clinician to set goal (see review items).'}</p>`}</div>`);

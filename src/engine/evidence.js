@@ -74,6 +74,12 @@ export const EVIDENCE = Object.freeze({
     status: 'verified',
     note: 'Background for CAC-based risk refinement. MESA risk score itself is NOT implemented here.',
   },
+  GUIDELINE_2026_SUMMARY: {
+    cite: '2026 ACC/AHA Dyslipidemia Guidelines: Lipoprotein Goals & Clinical Risk Stratification \u2014 summary table maintained by the project physician lead (Google Doc, Aug 2026).',
+    doi: null,
+    status: 'clinician-confirmed',
+    note: 'Goal columns <100 / <70 / <55 by PREVENT tier, CAC, diabetes, LDL-C \u2265190, ASCVD; ApoB optional goals; Lp(a) and PCSK9 guidance. Adopted by physician lead 2026-10-30. A summary, not the guideline full text.',
+  },
   PHYSICIAN_LEAD: {
     cite: 'Project physician lead (preventive cardiologist) decision, 2026-10-30, where the 2026 guideline text available to the build was ambiguous.',
     doi: null,

@@ -13,6 +13,9 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 | PREVENT base 10-year equations (total CVD, ASCVD, HF), all coefficients and transforms | Khan SS et al. Circulation 2024;149:430–449, Suppl. Table S12A | verified (see VALIDATION.md; external AHA-calculator check still pending) |
 | Valid input ranges (age 30–79, TC 130–320, HDL 20–100, SBP 90–200, BMI 18.5–39.9, eGFR 15–140). Out-of-range inputs are **rejected, not clamped** | AHA PREVENT calculator | verified |
 
+## 2026 summary table (physician lead)
+The goal columns (<100 / <70 / <55), CAC, diabetes, LDL-C ≥190, ASCVD, ApoB and Lp(a) rules follow the physician lead's 2026 guideline summary table (Google Doc, Aug 2026), evidence ID `GUIDELINE_2026_SUMMARY`, status **clinician-confirmed**. This replaces the earlier interim choices.
+
 ## Risk tiers and goals (2026 ACC/AHA dyslipidemia guideline)
 | Rule | Status |
 |---|---|
@@ -25,11 +28,13 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 | CAC 0 does not de-risk FH | secondary-source |
 | CAC scoring for men >40, women >45 at borderline/intermediate risk | secondary-source |
 | Measure Lp(a) in all adults | secondary-source |
-| "Moderate-to-severe" CAC → high-intensity statin, LDL-C <70, defined as **CAC ≥300** | clinician-confirmed |
-| CAC ≥1000 → LDL-C <70, with <55 shown as a consideration | clinician-confirmed |
+| CAC 1–99 → <100; ≥100 or ≥75th %ile → <70; 300–999 → optional <55; ≥1000 → <55 | clinician-confirmed (summary table) |
 | CAC 0 → rescan in 5 years | clinician-confirmed |
-| All clinical ASCVD → LDL-C <55 | clinician-confirmed |
-| LDL-C ≥190 / FH → LDL-C <70 and ≥50% reduction | clinician-confirmed |
+| ASCVD → <70 (optional <55); very high risk, + CKD 3+, or + FH → <55 | clinician-confirmed (summary table) |
+| LDL-C ≥190 → <100, or <70 with HeFH / risk factors / CAC >0; ≥50% reduction | clinician-confirmed (summary table) |
+| Diabetes 40–75 → <100; with modifiers → high-intensity, <70 | clinician-confirmed (summary table) |
+| Low risk, 30–59, untreated LDL-C 160–189 → <100 | clinician-confirmed (summary table) |
+| Optional ApoB goals <90 / <70 / <55 | clinician-confirmed (summary table) |
 | On a statin: use pre-statin TC/HDL-C for PREVENT when entered | clinician-confirmed |
 
 ## 2018 AHA/ACC cholesterol guideline (Grundy et al., Circulation 2019)

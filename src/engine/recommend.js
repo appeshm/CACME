@@ -69,19 +69,37 @@ export function recommend(pt) {
     out.pathway = 'secondary';
     raise('high', 'Clinical ASCVD: high-intensity (or maximally tolerated) statin.', ['CHOLESTEROL_2018', 'DYSLIPIDEMIA_2026']);
     const sp = GUIDELINE.secondaryPrevention;
-    const rule = pt.veryHighRisk ? sp.ldlGoalVeryHighRisk : sp.ldlGoalAscvd;
-    if (usable(rule)) goal(rule.value, pt.veryHighRisk ? 'Very-high-risk ASCVD' : 'Clinical ASCVD', rule.evidence, rule.status);
-    else flag('review', `Secondary-prevention LDL-C goal (${rule.value} mg/dL) is not yet verified against the 2026 guideline text; clinician to confirm goal.`, rule.evidence);
+    const vhrReasons = [];
+    if (pt.veryHighRisk) vhrReasons.push('very high risk (multiple major events or 1 major event + \u22652 high-risk conditions)');
+    if (Number.isFinite(pt.egfr) && pt.egfr < sp.ckdEgfrThreshold) vhrReasons.push(`CKD stage 3+ (eGFR ${pt.egfr})`);
+    if (pt.fh) vhrReasons.push('familial hypercholesterolemia');
+    out.veryHighRisk = vhrReasons.length > 0;
+    if (out.veryHighRisk) {
+      const rule = sp.ldlGoalVeryHighRisk;
+      goal(rule.value, `Clinical ASCVD with ${vhrReasons.join(', ')}`, rule.evidence, rule.status);
+      flag('info', 'Very high risk: early nonstatin escalation (ezetimibe and/or PCSK9 mAb, bempedoic acid or inclisiran) if not at goal on maximally tolerated statin.', rule.evidence);
+    } else {
+      const rule = sp.ldlGoalAscvd;
+      goal(rule.value, 'Clinical ASCVD (not very high risk)', rule.evidence, rule.status);
+      flag('info', `Optional intensive goal: LDL-C <${rule.optionalGoal} mg/dL by shared decision-making.`, rule.evidence);
+    }
+    if ((pt.enhancers || []).includes('lpa')) {
+      flag('info', 'Elevated Lp(a) with clinical ASCVD: if LDL-C is not at goal, adding a PCSK9 mAb is favored.', ['GUIDELINE_2026_SUMMARY']);
+    }
     flag('info', 'PREVENT is not used in patients with established ASCVD.', ['PREVENT_2024']);
   } else if (pt.fh || (Number.isFinite(pt.ldl) && pt.ldl >= GUIDELINE.severeHypercholesterolemia.ldlThreshold)) {
     out.pathway = 'severe';
     raise('high', 'LDL-C ≥190 mg/dL or familial hypercholesterolemia: high-intensity statin without needing risk calculation.', ['CHOLESTEROL_2018']);
-    const rule = GUIDELINE.severeHypercholesterolemia.ldlGoal;
-    if (usable(rule)) {
-      goal(rule.value, 'LDL-C ≥190 / FH', rule.evidence, rule.status);
-      flag('info', `Goal: LDL-C <${rule.value} mg/dL AND ≥${Math.round(rule.minReduction * 100)}% reduction from untreated baseline.`, rule.evidence);
-    }
-    else flag('review', 'For LDL-C ≥190 / FH, the 2018 guideline supports adding ezetimibe if LDL-C stays ≥100 mg/dL on maximal statin. The 2026 goal for this group is not yet verified; clinician to confirm.', rule.evidence);
+    const sh = GUIDELINE.severeHypercholesterolemia;
+    const why = [];
+    if (pt.fh) why.push('HeFH');
+    if (Number.isFinite(pt.cac?.score) && pt.cac.score > 0) why.push(`subclinical atherosclerosis (CAC ${pt.cac.score})`);
+    const rf = sh.riskFactorKeys.filter((k) => pt[k] || (pt.enhancers || []).includes(k));
+    if (rf.length) why.push(`ASCVD risk factors: ${rf.join(', ')}`);
+    const rule = why.length ? sh.ldlGoalEnhanced : sh.ldlGoal;
+    goal(rule.value, why.length ? `LDL-C \u2265190 / FH with ${why.join('; ')}` : 'LDL-C \u2265190 without HeFH, risk factors or subclinical atherosclerosis', rule.evidence, rule.status);
+    flag('info', `Goal: LDL-C <${rule.value} mg/dL AND \u2265${Math.round(sh.ldlGoal.minReduction * 100)}% reduction from untreated baseline.`, rule.evidence);
+    if (rf.length) flag('review', `"Additional ASCVD risk factors" was taken to mean: ${rf.join(', ')}. Confirm this applies.`, ['GUIDELINE_2026_SUMMARY']);
     flag('info', 'Consider evaluation for familial hypercholesterolemia and cascade screening of relatives.', ['CHOLESTEROL_2018']);
   } else {
     out.pathway = 'primary';
@@ -108,10 +126,27 @@ export function recommend(pt) {
       }
     }
 
-    // Diabetes 40–75 (2018, COR I)
+    // Diabetes 40–75
     const dm = GUIDELINE.diabetes;
     if (pt.diabetes && pt.age >= dm.ageMin && pt.age <= dm.ageMax) {
-      raise(dm.minStatin, 'Diabetes, age 40–75: at least moderate-intensity statin.', dm.evidence);
+      if (pt.diabetesModifiers) {
+        raise(dm.withModifiers.statin, 'Diabetes, age 40\u201375, with ASCVD risk factors or diabetes-specific risk modifiers: high-intensity statin.', dm.evidence);
+        goal(dm.withModifiers.ldlGoal, 'Diabetes with risk factors/modifiers', dm.evidence, 'clinician-confirmed');
+      } else {
+        raise(dm.minStatin, 'Diabetes, age 40\u201375: at least moderate-intensity statin.', dm.evidence);
+        goal(dm.ldlGoal, 'Diabetes, age 40\u201375', dm.evidence, 'clinician-confirmed');
+      }
+    }
+
+    // Low risk but untreated LDL-C 160–189, age 30–59
+    const lr = GUIDELINE.lowRiskHighLdl;
+    const baseLdl = onStatin ? pt.untreatedLdl : pt.ldl;
+    if (out.tier === 'low' && pt.age >= lr.ageMin && pt.age <= lr.ageMax && Number.isFinite(baseLdl) && baseLdl >= lr.ldlMin && baseLdl <= lr.ldlMax) {
+      raise(lr.statin, `Low 10-year risk but untreated LDL-C ${baseLdl} mg/dL (160\u2013189), age 30\u201359.`, lr.evidence);
+      goal(lr.ldlGoal, 'Untreated LDL-C 160\u2013189, age 30\u201359', lr.evidence, 'clinician-confirmed');
+    }
+    if (out.tier === 'low' && pt.age <= 59) {
+      flag('info', 'The 2026 guideline also uses 30-year ASCVD risk \u226510% in adults 30\u201359. 30-year PREVENT is not yet built into this app.', ['GUIDELINE_2026_SUMMARY']);
     }
 
     // ---- 3. CAC ----------------------------------------------------------
@@ -147,7 +182,11 @@ export function recommend(pt) {
       reason: basis.map((c) => c.reason).join('; '),
       evidence: [...new Set(basis.flatMap((c) => c.evidence))],
       status: basis.some((c) => c.status === 'needs-review') ? 'needs-review' : basis[0].status,
+      apobValue: GUIDELINE.apobGoals[value] ?? null,
     };
+    if (out.ldlGoal.apobValue) {
+      flag('info', `Optional ApoB goal <${out.ldlGoal.apobValue} mg/dL, mainly once LDL-C/non-HDL-C goals are met in diabetes, CKM syndrome or triglycerides 150\u2013499 mg/dL.`, ['GUIDELINE_2026_SUMMARY']);
+    }
     addEv(['DYSLIPIDEMIA_2026']);
   }
 
@@ -194,27 +233,32 @@ function interpretCac(pt, out, { raise, goal, flag }) {
     return res;
   }
 
-  // CAC > 0: any calcium supports LDL-C <100 (2026, secondary-source)
-  const mild = cfg.mild;
-  raise(mild.statin, `CAC = ${res.score}: presence of coronary calcium favors statin therapy.`, mild.evidence);
-  goal(mild.ldlGoal, `CAC > 0`, mild.evidence, mild.status);
-  res.category = 'mild';
-  res.text = `CAC ${res.score}: supports statin therapy with LDL-C goal <${mild.ldlGoal} mg/dL.`;
-
-  if (res.score >= cfg.elevated.min) {
+  // CAC > 0 (2026 summary table, adopted by physician lead)
+  const pctl = Number.isFinite(pt.cac?.percentile) ? pt.cac.percentile : null;
+  const e = cfg.elevated;
+  if (res.score >= e.min || (pctl != null && pctl >= e.percentile)) {
     res.category = 'elevated';
-    const e = cfg.elevated;
-    if (e.status !== 'needs-review' || GUIDELINE.applyUnverifiedThresholds) {
-      raise(e.statin, `CAC ≥${e.min}: high-intensity statin.`, e.evidence);
-      goal(e.ldlGoal, `CAC ≥${e.min}`, e.evidence, e.status);
-      res.text = `CAC ${res.score}: high-intensity statin with LDL-C goal <${e.ldlGoal} mg/dL.`;
-    } else {
-      flag('review', `CAC = ${res.score}. The 2026 guideline supports high-intensity statin with LDL-C <${e.ldlGoal} mg/dL for "moderate-to-severe" coronary calcium. Whether this maps to CAC ≥${e.min} has not been verified, so it is not applied automatically. Clinician to decide.`, e.evidence);
-    }
+    const basis = res.score >= e.min ? `CAC ${res.score}` : `CAC at the ${pctl}th percentile`;
+    raise(e.statin, `${basis}: high-intensity statin.`, e.evidence);
+    goal(e.ldlGoal, `${basis} (\u2265${e.min} AU or \u2265${e.percentile}th percentile)`, e.evidence, e.status);
+    res.text = `${basis}: high-intensity statin, LDL-C goal <${e.ldlGoal} mg/dL.`;
+  } else {
+    const m = cfg.mild;
+    res.category = 'mild';
+    raise(m.statin, `CAC ${res.score}: presence of coronary calcium favors statin therapy.`, m.evidence);
+    goal(m.ldlGoal, 'CAC 1\u201399 (<75th percentile)', m.evidence, m.status);
+    res.text = `CAC ${res.score}: moderate-intensity statin, LDL-C goal <${m.ldlGoal} mg/dL.`;
+    if (pctl == null) flag('info', 'CAC percentile not entered. If the score is \u226575th percentile for age, sex and race (MESA), the goal becomes <70.', m.evidence);
   }
   if (res.score >= cfg.veryHigh.min) {
+    const v = cfg.veryHigh;
     res.category = 'very-high';
-    flag('review', `CAC ≥${cfg.veryHigh.min}: event rates in observational cohorts approach those of secondary prevention. Consider a lower LDL-C goal of <${cfg.veryHigh.considerGoal} mg/dL (clinician decision; not applied automatically).`, cfg.veryHigh.evidence);
+    raise(v.statin, `Extensive CAC (\u2265${v.min} AU).`, v.evidence);
+    goal(v.ldlGoal, `Extensive CAC \u2265${v.min}`, v.evidence, v.status);
+    res.text = `CAC ${res.score}: extensive coronary calcium; LDL-C goal <${v.ldlGoal} mg/dL.`;
+  } else if (res.score >= cfg.severe.min) {
+    res.category = 'severe';
+    flag('info', `Severe CAC (300\u2013999): optional intensive goal LDL-C <${cfg.severe.optionalGoal} mg/dL to further lower risk.`, cfg.severe.evidence);
   }
   return res;
 }

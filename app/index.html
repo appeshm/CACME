@@ -46,9 +46,11 @@
         <legend>History</legend>
         <div class="chks">
           <label class="chk"><input id="diabetes" type="checkbox"> Diabetes</label>
+          <label class="chk"><input id="diabetesModifiers" type="checkbox"> Diabetes with ASCVD risk factors or diabetes-specific modifiers (long duration, albuminuria, eGFR &lt;60, retinopathy, neuropathy, ABI &lt;0.9)</label>
           <label class="chk"><input id="smoker" type="checkbox"> Current smoker</label>
           <label class="chk"><input id="onBpMeds" type="checkbox"> On blood-pressure medication</label>
           <label class="chk"><input id="clinicalAscvd" type="checkbox"> Clinical ASCVD (MI, stroke, PAD, revascularization)</label>
+          <label class="chk"><input id="veryHighRisk" type="checkbox"> Very high risk ASCVD (multiple major events, or 1 major event + &ge;2 high-risk conditions)</label>
           <label class="chk"><input id="fh" type="checkbox"> Familial hypercholesterolemia</label>
           <label class="chk"><input id="statinIntolerance" type="checkbox"> Statin intolerance</label>
         </div>
@@ -57,6 +59,7 @@
         <legend>Coronary artery calcium</legend>
         <div class="row">
           <label class="f">Agatston score <span class="unit">blank if not done</span><input id="cac" type="number" inputmode="numeric" min="0"></label>
+          <label class="f">Percentile <span class="unit">MESA, optional</span><input id="cacPercentile" type="number" inputmode="numeric" min="0" max="100"></label>
         </div>
       </fieldset>
       <fieldset>

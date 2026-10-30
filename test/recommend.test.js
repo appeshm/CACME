@@ -52,10 +52,20 @@ test('CAC > 0 sets LDL-C goal <100 and at least moderate statin', () => {
   assert.equal(r.statin.intensity, 'moderate');
 });
 
-test('CAC 100-299 stays moderate with goal <100', () => {
-  const r = recommend({ ...pp, cac: { score: 250 } });
-  assert.equal(r.ldlGoal.value, 100);
-  assert.equal(r.statin.intensity, 'moderate');
+test('CAC 100-299 gives high-intensity statin and goal <70', () => {
+  const r = recommend({ ...pp, cac: { score: 150 } });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.equal(r.statin.intensity, 'high');
+});
+
+test('CAC 1-99 at >=75th percentile gives goal <70', () => {
+  assert.equal(recommend({ ...pp, cac: { score: 40, percentile: 80 } }).ldlGoal.value, 70);
+});
+
+test('CAC 300-999 offers optional <55', () => {
+  const r = recommend({ ...pp, cac: { score: 500 } });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.ok(r.flags.some((f) => f.text.includes('optional intensive goal LDL-C <55')));
 });
 
 test('CAC >=300 gives high-intensity statin and goal <70', () => {
@@ -64,14 +74,37 @@ test('CAC >=300 gives high-intensity statin and goal <70', () => {
   assert.equal(r.statin.intensity, 'high');
 });
 
-test('CAC >=1000 keeps goal <70 and suggests considering <55', () => {
-  const r = recommend({ ...pp, cac: { score: 1200 } });
-  assert.equal(r.ldlGoal.value, 70);
-  assert.ok(r.flags.some((f) => f.text.includes('<55')));
+test('CAC >=1000 gives goal <55', () => {
+  assert.equal(recommend({ ...pp, cac: { score: 1200 } }).ldlGoal.value, 55);
 });
 
-test('all clinical ASCVD has goal <55', () => {
-  assert.equal(recommend({ ...pp, clinicalAscvd: true }).ldlGoal.value, 55);
+test('ASCVD not very high risk: <70 with optional <55', () => {
+  const r = recommend({ ...pp, clinicalAscvd: true });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.ok(r.flags.some((f) => f.text.includes('Optional intensive goal')));
+});
+
+test('ASCVD with CKD stage 3+ is very high risk (<55)', () => {
+  assert.equal(recommend({ ...pp, clinicalAscvd: true, egfr: 50 }).ldlGoal.value, 55);
+});
+
+test('LDL-C >=190 without risk factors or CAC has goal <100', () => {
+  const r = recommend({ ...pp, onBpMeds: false, ldl: 200, cac: { score: 0 } });
+  assert.equal(r.ldlGoal.value, 100);
+});
+
+test('diabetes: <100 without modifiers, <70 with', () => {
+  const base = { ...pp, age: 50, diabetes: true, onBpMeds: false, sbp: 118 };
+  assert.equal(recommend(base).ldlGoal.value, 100);
+  const r = recommend({ ...base, diabetesModifiers: true });
+  assert.equal(r.ldlGoal.value, 70);
+  assert.equal(r.statin.intensity, 'high');
+});
+
+test('low risk, age 30-59, untreated LDL-C 160-189 gets goal <100', () => {
+  const r = recommend({ ...pp, age: 40, sbp: 115, onBpMeds: false, totalCholesterol: 250, hdl: 60, ldl: 170 });
+  assert.equal(r.tier, 'low');
+  assert.equal(r.ldlGoal.value, 100);
 });
 
 test('LDL-C >=190 has goal <70 with >=50% reduction note', () => {
