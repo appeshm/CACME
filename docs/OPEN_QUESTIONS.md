@@ -15,7 +15,7 @@ Answer them (with the guideline section or table number) and the config in
 | 5 | ~~LDL-C ≥190 / FH~~ **Answered (2026 summary doc):** <100 if no HeFH, risk factors or subclinical atherosclerosis; otherwise <70. Always ≥50% reduction. | Applied. | `severeHypercholesterolemia` |
 | 6 | ~~Diabetes~~ **Answered (2026 summary doc):** age 40–75 → ≥moderate statin, <100; with risk factors / diabetes-specific modifiers → high-intensity, <70. | Applied. | `diabetes` |
 | 7 | **30-year PREVENT.** Physician lead will upload the Khan et al. supplement; coefficients to be entered and cross-checked. | Pending upload. | `prevent.js` |
-| 8 | **PREVENT full model (UACR, HbA1c, SDI).** Pending the same supplement upload. | Pending upload. | `prevent.js` |
+| 8 | **PREVENT full model (UACR, HbA1c, SDI).** Pending the same supplement upload. **Use the October 2026 AHA update** to the HbA1c add-on and full equations (Table 3, p. 437), not the original 2024 coefficients. | Pending upload. | `prevent.js` |
 | 9 | ~~Very-high-risk definition~~ Checkbox restored (needed again now that non-very-high ASCVD is <70). CKD 3+ and FH with ASCVD are detected automatically. | Applied. | UI |
 | 10 | ~~Patients already on a statin~~ **Answered: ask for pre-statin lipids.** Optional pre-statin TC/HDL-C give a statin-naive estimate; otherwise the on-treatment estimate is shown with a review note. Pre-statin LDL-C is used to check the ≥50% reduction target. | Applied. | `recommend.js` |
 | 11 | ~~PCSK9 in primary prevention~~ **Answered: suggest it** after statin + ezetimibe when the goal is <70 (high risk or CAC ≥300), citing VESALIUS-CV with a note on the trial population. | Applied. | `buildPlan` |

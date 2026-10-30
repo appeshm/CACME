@@ -10,6 +10,10 @@ Every rule in the engine points to an ID in `src/engine/evidence.js`. Each ID ha
 - **needs-review**: plausible but not confirmed. **Never applied automatically.** Shown to the clinician as a "review" note.
 
 ## Risk model
+Published changes to the PREVENT paper, checked 2026-10-30:
+- **Correction, Circulation 2024;149(11):e956:** changes only the American Community Survey year range for the social deprivation index (2015–2020 → 2015–2019). No effect on the base model used here.
+- **AHA update, October 14, 2026 (PREVENT Update FAQ):** small change to the HbA1c add-on equations and the full equations (Table 3, p. 437). No effect on the base model. Any future full-model work must use the updated coefficients.
+
 | Item | Source | Status |
 |---|---|---|
 | PREVENT base 10-year equations (total CVD, ASCVD, HF), all coefficients and transforms | Khan SS et al. Circulation 2024;149:430–449, Suppl. Table S12A | verified (see VALIDATION.md; external AHA-calculator check still pending) |
