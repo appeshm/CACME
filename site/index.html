@@ -12,7 +12,7 @@
 :root {
   --bg: #f5f7f8; --surface: #ffffff; --ink: #15232b; --muted: #5a6a73; --line: #d8e0e4;
   --accent: #0b6e72; --accent-soft: #e2f1f1;
-  --g100: #2f7d4f; --g70: #c17a12; --g55: #b3352b;
+  --g100: #2f7d4f; --g70: #c17a12; --g55: #b3352b; --warn-bg: #fdf1dc; --warn-ink: #6b4100; --warn-line: #e3b866;
   --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
   --font-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -20,12 +20,12 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
-    --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; color-scheme: dark;
+    --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; --warn-bg: #3a2a0e; --warn-ink: #f3d39a; --warn-line: #8a6420; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
-  --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; color-scheme: dark;
+  --accent: #4fb9bb; --accent-soft: #173a3d; --g100: #5cbf83; --g70: #e2a24a; --g55: #ec7a6f; --warn-bg: #3a2a0e; --warn-ink: #f3d39a; --warn-line: #8a6420; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -83,7 +83,12 @@ ol.steps span { font-size: 0.88rem; color: var(--muted); }
 .facts h3 { font-size: 1.02rem; margin: 0 0 6px; }
 .facts p { margin: 0; color: var(--muted); font-size: 0.95rem; }
 
-.notice { background: var(--accent-soft); border-radius: 8px; padding: 18px 20px; font-size: 0.9rem; max-width: 75ch; }
+.warnbar { background: var(--warn-bg); color: var(--warn-ink); border-bottom: 1px solid var(--warn-line); padding-block: 10px; font-size: 0.92rem; }
+.warnbar strong { font-weight: 700; }
+.tag { display: inline-block; font-family: var(--font-num); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn-ink); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 999px; padding: 2px 9px; vertical-align: middle; margin-left: 8px; }
+.notice { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); border-radius: 8px; padding: 20px 22px; max-width: 75ch; }
+.notice h2 { font-family: var(--font-head); font-size: 1.3rem; margin: 0 0 10px; color: var(--warn-ink); }
+.notice ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
 footer { padding-block: 36px 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
 footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
 </style>
@@ -95,6 +100,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <nav><a href="ldl-goal-navigator/">LDL Goal Navigator</a></nav>
   </div>
 </header>
+<div class="warnbar" role="note">
+  <div class="wrap"><strong>Experimental tool. Not clinically validated.</strong> All treatment decisions must be made by a physician, not by this tool.</div>
+</div>
 
 <main>
   <section class="hero">
@@ -120,12 +128,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   <section class="block" id="how">
     <div class="wrap">
-      <h2 class="sec">LDL Goal Navigator</h2>
+      <h2 class="sec">LDL Goal Navigator <span class="tag">Experimental</span></h2>
       <p class="sub">Answer only the questions that can change the goal or the medicines. Known ASCVD takes a handful of fields; primary prevention adds CAC and the PREVENT score.</p>
       <div class="tool">
         <div>
           <h3>From chart data to a treatment plan</h3>
-          <p>Enter the values or launch it from Epic. You get an LDL-C goal, statin intensity and starting doses, the expected LDL-C after each step, and when to recheck.</p>
+          <p>Enter the values or launch it from Epic. It suggests an LDL-C goal, statin intensity and starting doses, the expected LDL-C after each step, and when to recheck, for a physician to review.</p>
           <a class="btn primary" href="ldl-goal-navigator/">Open the tool</a>
         </div>
         <ol class="steps">
@@ -150,7 +158,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   <section class="block">
     <div class="wrap">
-      <p class="notice"><strong>For clinicians.</strong> LDL Goal Navigator is decision support. It does not replace clinical judgment, is not FDA-cleared, and is under validation. Review every recommendation before acting on it.</p>
+      <div class="notice" id="disclaimer">
+        <h2>Important: experimental, not clinically validated</h2>
+        <ul>
+          <li>LDL Goal Navigator is an experimental prototype. It has not been clinically validated and is not FDA-cleared.</li>
+          <li>It does not give medical advice. Its output is a suggestion for a physician to review, and it may contain errors.</li>
+          <li>All diagnosis and treatment decisions must be made by a physician who knows the patient, not by this tool.</li>
+          <li>Patients should not start, stop or change any medicine based on this tool. Talk to your physician.</li>
+        </ul>
+      </div>
     </div>
   </section>
 </main>
@@ -158,7 +174,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <footer>
   <div class="wrap">
     <span>&copy; 2026 11well</span>
-    <span>Created by a practicing cardiologist.</span>
+    <span>Experimental. Not clinically validated. Not medical advice. Created by a practicing cardiologist.</span>
   </div>
 </footer>
 </body>

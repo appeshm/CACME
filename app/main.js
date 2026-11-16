@@ -110,7 +110,7 @@ function renderClin(r) {
        <p class="refs" style="margin:6px 0 0">Basis: ${esc(g.reason)} &middot; ${esc(g.evidence.join(', '))}</p>`
     : `<p style="margin:0">${r.statin.intensity === 'defer' ? 'No goal while statin is deferred (CAC = 0).' : 'No automatic goal. Clinician to set goal (see review items).'}</p>`}</div>`);
 
-  parts.push(`<div class="card"><h2>Plan</h2><ol class="plan">${r.plan.map((s) => `<li>${esc(s.text)}${
+  parts.push(`<div class="card"><h2>Suggested plan &middot; for physician review</h2><ol class="plan">${r.plan.map((s) => `<li>${esc(s.text)}${
       s.projectedLdl != null ? `<br><span class="proj">est. LDL-C ${s.projectedFrom} → ${s.projectedLdl} mg/dL</span>` : ''}${
       (s.safety || []).map((t) => `<span class="safety">${esc(t)}</span>`).join('')}${refs(s.evidence)}</li>`).join('')}</ol>
     ${r.projectedLdlAfterStatin != null ? `<p class="refs" style="margin:10px 0 0">Projected LDL-C on the suggested statin: ~${r.projectedLdlAfterStatin} mg/dL (uses the low end of the guideline's expected reduction, so it errs toward needing more therapy).</p>` : ''}</div>`);
@@ -143,7 +143,7 @@ function renderPatient(r) {
   const meds = r.plan.filter((s) => s.kind === 'statin' || s.kind === 'nonstatin');
   if (meds.length) p.push('<p>Your clinician may talk with you about cholesterol medicine. A statin is usually the first choice. If your LDL is still above goal after a few weeks, another medicine can be added.</p>');
   p.push('<p>Healthy eating, regular activity, not smoking, and good blood pressure control lower your risk whatever medicines you take.</p>');
-  p.push('<p class="refs">This summary supports, and does not replace, a conversation with your clinician.</p>');
+  p.push('<p><strong>Important:</strong> this summary comes from an experimental tool that has not been clinically validated. Do not start, stop or change any medicine because of it. Your physician makes your treatment decisions.</p>');
   $('pt').innerHTML = `<h2>Your heart-health summary</h2>${p.join('')}`;
 }
 
@@ -178,3 +178,17 @@ window.LDLGoalNavigator = {
 
 fill(EXAMPLE);
 run();
+
+// One-time acknowledgement (remembered in this browser when storage is available).
+(() => {
+  const KEY = 'ldlgn-ack-v1';
+  let seen = false;
+  try { seen = localStorage.getItem(KEY) === 'yes'; } catch { /* storage blocked: ask every time */ }
+  if (seen) return;
+  $('ack').hidden = false;
+  $('ackBtn').focus();
+  $('ackBtn').addEventListener('click', () => {
+    try { localStorage.setItem(KEY, 'yes'); } catch { /* ignore */ }
+    $('ack').hidden = true;
+  });
+})();

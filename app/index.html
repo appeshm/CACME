@@ -15,7 +15,8 @@
     <h1>LDL Goal <span>Navigator</span></h1>
     <p>PREVENT risk &rarr; CAC refinement &rarr; LDL-C goal &rarr; therapy</p>
   </header>
-  <div class="banner" id="banner"><strong>Example patient loaded.</strong> Decision support for clinicians, not a substitute for clinical judgment. Rules are cross-checked against the full 2026 ACC/AHA dyslipidemia guideline; items marked <em>review</em> need your judgment and are never applied automatically.</div>
+  <div class="warnbar" role="note"><strong>Experimental tool. Not clinically validated.</strong> All treatment decisions must be made by a physician, not by this tool.</div>
+  <div class="banner" id="banner"><strong>Example patient loaded.</strong> Rules are cross-checked against the full 2026 ACC/AHA dyslipidemia guideline; items marked <em>review</em> need your judgment and are never applied automatically.</div>
   <div class="grid">
     <form id="form" novalidate>
       <fieldset>
@@ -124,7 +125,19 @@
       <div id="pt" class="card patient" hidden></div>
     </section>
   </div>
-  <p class="foot">Risk model: AHA PREVENT base equations, 10-year (Khan et al., Circulation 2024). Treatment thresholds: 2026 ACC/AHA multisociety dyslipidemia guideline, with the 2018 AHA/ACC cholesterol guideline and the 2022 ACC nonstatin pathway where noted. Every recommendation lists its sources and how well they have been verified. Not FDA-cleared. Not for use without clinician review. <a href="../">11well home</a></p>
+  <p class="foot">Risk model: AHA PREVENT base equations, 10-year (Khan et al., Circulation 2024). Treatment thresholds: 2026 ACC/AHA multisociety dyslipidemia guideline, with the 2018 AHA/ACC cholesterol guideline and the 2022 ACC nonstatin pathway where noted. Every recommendation lists its sources and how well they have been verified. <strong>Experimental and not clinically validated. Not FDA-cleared. Not medical advice. All treatment decisions must be made by a physician.</strong> <a href="../">11well home</a></p>
+</div>
+<div class="ack" id="ack" role="dialog" aria-modal="true" aria-labelledby="ackTitle" hidden>
+  <div class="ackbox">
+    <h2 id="ackTitle">Before you use this tool</h2>
+    <ul>
+      <li>LDL Goal Navigator is <strong>experimental</strong> and has <strong>not been clinically validated</strong>. It is not FDA-cleared.</li>
+      <li>Its output is a suggestion for a physician to review. It may contain errors and does not give medical advice.</li>
+      <li><strong>All treatment decisions must be made by a physician</strong>, not by this tool.</li>
+      <li>Patients should not start, stop or change medicines based on it.</li>
+    </ul>
+    <button type="button" class="primary" id="ackBtn">I understand</button>
+  </div>
 </div>
 <!-- BODY:END -->
 <script src="vendor/fhir-client-2.6.3.min.js"></script>

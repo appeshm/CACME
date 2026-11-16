@@ -8,6 +8,7 @@
   --accent: #0b6e72;
   --accent-soft: #e2f1f1;
   --ok: #2f7d4f;
+  --warn-bg: #fdf1dc; --warn-ink: #6b4100; --warn-line: #e3b866;
   --warn: #a8640c;
   --crit: #b3352b;
   --info: #3a5f8a;
@@ -19,14 +20,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
-    --accent: #4fb9bb; --accent-soft: #173a3d; --ok: #5cbf83; --warn: #e2a24a; --crit: #ec7a6f; --info: #86aedb;
+    --accent: #4fb9bb; --accent-soft: #173a3d; --warn-bg: #3a2a0e; --warn-ink: #f3d39a; --warn-line: #8a6420; --ok: #5cbf83; --warn: #e2a24a; --crit: #ec7a6f; --info: #86aedb;
     --t-low: #5cbf83; --t-border: #c9c64f; --t-inter: #e2a24a; --t-high: #ec7a6f;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f171b; --surface: #16222a; --ink: #e3ebee; --muted: #93a5ae; --line: #2a3a43;
-  --accent: #4fb9bb; --accent-soft: #173a3d; --ok: #5cbf83; --warn: #e2a24a; --crit: #ec7a6f; --info: #86aedb;
+  --accent: #4fb9bb; --accent-soft: #173a3d; --warn-bg: #3a2a0e; --warn-ink: #f3d39a; --warn-line: #8a6420; --ok: #5cbf83; --warn: #e2a24a; --crit: #ec7a6f; --info: #86aedb;
   --t-low: #5cbf83; --t-border: #c9c64f; --t-inter: #e2a24a; --t-high: #ec7a6f;
   color-scheme: dark;
 }
@@ -112,3 +113,10 @@ ol.plan .safety { color: var(--crit); font-size: 0.82rem; display: block; }
 .pathway { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
 .pathway:empty { display: none; }
 .modes { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+.warnbar { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); border-radius: 6px; padding: 10px 14px; font-size: 0.9rem; margin-bottom: 12px; }
+.ack { position: fixed; inset: 0; z-index: 50; background: rgba(10, 18, 22, 0.6); display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.ackbox { background: var(--surface); color: var(--ink); border: 1px solid var(--warn-line); border-radius: 8px; padding: 20px 22px; max-width: 34rem; width: 100%; max-height: 100%; overflow-y: auto; }
+.ackbox h2 { font-family: var(--font-head); margin: 0 0 10px; font-size: 1.3rem; }
+.ackbox ul { margin: 0 0 16px; padding-left: 1.2em; display: grid; gap: 8px; }

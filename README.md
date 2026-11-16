@@ -4,7 +4,7 @@ Cardiovascular prevention decision support (repository: CACME).
 
 Clinical decision support for primary care. It estimates cardiovascular risk with the AHA **PREVENT** equations, refines the decision with a **coronary artery calcium (CAC)** score, sets an **LDL-C goal**, and suggests **statin intensity, doses and add-on therapy**, with a literature citation on every recommendation. It is built to plug into **Epic** as a SMART on FHIR app.
 
-> Decision support only. Not FDA-cleared. Not validated for clinical use. See `docs/VALIDATION.md` and `docs/OPEN_QUESTIONS.md`.
+> **Experimental. Not clinically validated. Not FDA-cleared. Not medical advice.** All treatment decisions must be made by a physician, not by this tool. The website shows this in a permanent warning bar and a one-time acknowledgement screen. See `docs/VALIDATION.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## How it decides
 The form asks only what can change the LDL-C goal or the medicine choice, in this order: clinical ASCVD → LDL-C ≥190 / FH → CAC → PREVENT → tier-specific questions.
